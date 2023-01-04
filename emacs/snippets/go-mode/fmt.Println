@@ -1,0 +1,4 @@
+# key: pl
+# name: fmt.Println
+# --
+fmt.Println("$0")

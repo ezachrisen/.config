@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: sort slice
+# key: sslice
+# --
+
+sort.Slice(${1:slice}, func(i, j int) bool {
+   return $1[i].${2:field} < $1[j].$2
+})

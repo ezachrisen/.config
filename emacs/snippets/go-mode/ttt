@@ -1,0 +1,43 @@
+# -*- mode: snippet -*-
+# name: testtable
+# key: ttt
+# --
+
+
+
+func Test${1:Something}(t *testing.T) {
+
+	for _, c := range []struct {
+		name string
+		in   string
+		want string
+		err  error
+	}{
+	{${2:params}}
+	} {
+	  
+	  t.Run(c.name, func(t *testing.T){
+	  t.Parallel()
+		got, err := ${3:function}(c.in)
+		if c.err == nil && err != nil {
+			t.Errorf("wanted no error, got %v", err)
+			return
+
+		}
+
+		if c.err != nil && !errors.Is(err, c.err) {
+			t.Errorf("wanted error '%s', got '%s'",  c.err, err)
+			return
+		}
+		if c.err != nil && err != nil {
+			return 
+		}
+
+		if c.want != got {
+			t.Errorf("\nwanted: %s\ngot   : %s", c.want, got)
+			return
+		}
+	})
+      }	
+
+}

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: trace
+# key: ltr
+# --
+
+logrus.Tracef("${} %v",${})

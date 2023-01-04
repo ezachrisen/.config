@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: is
+# key: isn
+# --
+
+is := is.New(t)
+
