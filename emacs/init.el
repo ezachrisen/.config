@@ -942,7 +942,7 @@ file, define-local-services must be run after .dir-locals.el has
 been loaded.
 
 See an example of .dir-locals.el at the end of init.el."
-  (when (boundp 'local-services)
+ (when (boundp 'local-services)
   (dolist (x local-services)
 	(prodigy-define-service
 	  :name (car x)
@@ -1216,6 +1216,7 @@ ARG is the full path to the directory where you want to run the
 		  (hack-dir-local-variables-non-file-buffer)		 ; load .dir-locals.el
 		  (define-pkgsite-service go-package-site-dir)		 ; set dir for Go doc server
 		  ; set up services defined in .dir-locals.el
+		  
 		  (define-local-services)							 
 		  (modify-syntax-entry ?= "w" go-mode-syntax-table)	 ; make = part of a word
 		  (modify-syntax-entry ?.  "_" go-mode-syntax-table) ; make . part of a word
@@ -1226,8 +1227,8 @@ ARG is the full path to the directory where you want to run the
 		  (setq tab-width 2)
 		  (company-mode)
 		  (lsp-deferred)
-		  (add-hook 'before-save-hook 'gofmt-before-save)
-		  (add-hook 'after-save-hook  #'go-test))))
+		  (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local)
+		  (add-hook 'after-save-hook 'go-test nil 'make-it-local))))
 
 
 
@@ -1665,20 +1666,20 @@ Toggle Windows
   _e_ end of defun    C-M-e   _w_ helm-grep-w C-c p *       _↓_                         _y_ new snippet      C-c y n  next compile error  C-x `
   _(_ backward list   C-M-p   In incremental-search:                                _b_ list snippets    C-c y l  prev compile error  C-x ~
   _)_ forward list    C-M-n    C-w yank word            ^Toggle^
-	back to ind.    M-m      M-s c toggle case        ^^──────────────────────────
+    back to ind.    M-m      M-s c toggle case        ^^──────────────────────────
   _]_ pop ez mark     C-]      M-s w toggle word        _h_ help                         repeat          C-x z
-							 M-s r toggle rexp        _v_ messages                     eval defun      C-M x
-							 C-o occur                _c_ compilation                  eval sexp bef.  C-x C-e
+                             M-s r toggle rexp        _v_ messages                     eval defun      C-M x
+                             C-o occur                _c_ compilation                  eval sexp bef.  C-x C-e
 
   ^Editing^                   ^Killing^                   ^Marking^                     ^Look^                        ^Git^
   ^^────────────────────────  ^^────────────────────────  ^^──────────────────────────  ^^──────────────────────────  ^^──────────────────────────
-  _j_ join lines    u C-j     kill whole line    M-k    _+_ expand region     C-\\     _r_ gruvbox                   _m_ magit           C-c g g
+  _j_ join lines    u C-j     kill whole line  M-k      _+_ expand region     C-\\     _r_ gruvbox                   _m_ magit           C-c g g
   _'_ align regexp    C-c a   zap-to-char      M-z      _d_ mark defun        C-M-h   _l_ leuven                    _\\_ diff to main    C-c C-\\
   _2_ dup. line/reg   M-\"     zap-up-to-char   M-Z      _h_ mark buffer       C-x h   _n_ nord                      _d_ vc-resolve-conf.
   _o_ open line above C-o     kill sexp        C-M-k                                _b_ borland
   _b_ open line below M-o     just one space   M-SPC                                _|_ Fill column
-   yank before      C-c yb  del blank lnes   C-x C-o                              _z_ Wide margins
-   yank after       C-c ya  kill line backw  M-0 C-k                              _Z_ Wide margins (all wins)
+    yank before     C-c yb  del blank lnes   C-x C-o                              _z_ Wide margins
+    yank after      C-c ya  kill line backw  M-0 C-k                              _Z_ Wide margins (all wins)
 							copy to OS       C-M-w                                 
 							paste from OS    C-M-y
 "
