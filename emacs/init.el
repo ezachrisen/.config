@@ -44,7 +44,7 @@
 ;; location where we want Emacs to write customizations, so they don't clutter
 ;; init.el.
 (setq custom-file "~/.config/emacs/custom.el")
-(load custom-file)
+(load custom-file 'noerror)
 
 
 (defun display-startup-time ()
