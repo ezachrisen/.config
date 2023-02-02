@@ -1119,10 +1119,9 @@ on save.")
 (defun go-test(&optional modulep)
   "Run go test on a package (default) or the module if MODULEP is t."
   (interactive)
-  (compile-wrap
-   (concat
+  (let((cmd (concat
 	(cond ((or modulep (not go-test-package-only)) (concat "cd " (go-module-dir) " && "))
-	 	  (go-test-path (concat "cd " go-test-path " && ") " "))
+	 	  ((not (string= go-test-path ""))(concat "cd " go-test-path " && ")))
 	(concat " " go-test-env " ")
 	"go test "
 	(if (not (string= go-test-run "")) (concat " -run=" go-test-run " "))
@@ -1130,7 +1129,9 @@ on save.")
 	(if (not (string= go-test-timeout "")) (concat " -timeout=" go-test-timeout " "))
 	(if go-test-short '" -short ")
 	(if go-test-verbose	'" -v ")
-	" ./... ")))
+	(if (or modulep (not go-test-package-only)) "./..."))))
+  (message "Command = %s" cmd)
+  (compile-wrap cmd)))
 
 (defun go-test-module-benchmarks()
   "Run benchmarks for the Go module."
@@ -1141,6 +1142,13 @@ on save.")
 						" ./...")))
 
 
+
+
+(cond
+ ((or 1 3) '1)
+ (2 '2)
+ (t
+  'other))
 
 
 ;; Go package site serves a web site for browsing go documentation for a module.
@@ -1205,7 +1213,7 @@ ARG is the full path to the directory where you want to run the
 	"Git"
 	(("d" magit-diff-to-main "diff to main"))
 	"Misc"
-	(("g" go-generate-module "go generate")
+	(("k" go-generate-module "go generate")
 	 ("r" lsp-rename "rename")
 	 )))
   :config
