@@ -957,10 +957,12 @@ See an example of .dir-locals.el at the end of init.el."
 	
 (defun restart-services(arg)
   "Start the services tagged with ARG or named ARG."
-  (interactive "s(Re)start services with tag or name: ") 
-  (do-with-services arg (lambda(s)(prodigy-restart-service s))))
+  (interactive "s(Re)start services with tag or name: ")   
+  (do-with-services arg (lambda(s)(prodigy-restart-service s)))  
+  (show-logs arg))
+ 
 
-(defun kill-services(arg)
+(defun kills-ervices(arg)
   "Stop the services tagged with ARG or named ARG."
   (interactive "sKill services with tag or name: ") 
   (do-with-services arg (lambda(s)(prodigy-stop-service s t))))
@@ -1017,6 +1019,7 @@ Services
 	("a" ((lambda()(restart-services "a"))) "Restart group a"))
 
 (global-set-key (kbd "C-c s") 'hydra-services/body)
+(global-set-key (kbd "C-t") (lambda ()(interactive) (show-logs "a")))
 
 
 
@@ -1077,6 +1080,16 @@ on save.")
 (string-prop "go-test-tags" "-tags=" "" "Run go test with -tags=ARG.")
 (string-prop "go-test-env"  "env=" "" "Set environment variables before running go test.")
 (string-prop "go-test-path" "-path=" "" "Run package-level tests in this directory.")
+
+
+(defun go-lint (&optional modulep)
+  "Run the golangci-lint linter in a package (default) or the module if MODULEP is t."
+  (interactive)
+  (let((cmd (concat
+			 (cond (modulep  (concat "cd " (go-module-dir) " && ")))
+			 "golangci-lint run")))
+	(message "Command = %s" cmd)
+  (compile-wrap cmd)))
 
 
 (defun go-module-name()
@@ -1201,10 +1214,9 @@ ARG is the full path to the directory where you want to run the
 	 ("v" go-test-verbose "verbose" :toggle t)
 	 ("h" go-test-path (go-test-path-display))
 	 )
-	"Checking"
-	(("n" go-lint "golangci-lint")
-	 ("l" go-all-linters "all")
-	 ("#" helm-lsp-diagnostics "diags")
+	"Lint"
+	(("x" ((lambda()(go-lint t)))  "module")
+	 ("l" go-lint "package")
 	 )
 	"Navigation"
 	(("a" go-open-alternate-file "alternate file")
@@ -1812,6 +1824,7 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 ;; byte-compile-warnings: (not free-vars)
 ;; sentence-end-double-space: nil
 ;; End:
+
 
 (message "end of init.el")
 
