@@ -24,6 +24,7 @@
 ;; Minimize garbage collection during startup
 (setq gc-cons-threshold most-positive-fixnum)
 
+(add-to-list 'load-path "~/.config/emacs")
 
 
 ;; ---------------------------------------------------------------------- STARTUP
@@ -587,7 +588,7 @@ Use in `isearch-mode-end-hook'."
 												; lsp-diagnostic-package :auto
 		eldoc-echo-area-use-multiline-p nil		; don't allow resizing echo area
 		lsp-eldoc-render-all nil				; only show symbol info in echo area
-		lsp-headerline-breadcrumb-enable t		; show file / func at top of screen
+		; lsp-headerline-breadcrumb-enable t		; show file / func at top of screen
 		read-process-output-max (* 1024 1024)	; read large input from lsp provider
 		lsp-log-io nil							; turn off lsp logging
 
@@ -942,6 +943,7 @@ file, define-local-services must be run after .dir-locals.el has
 been loaded.
 
 See an example of .dir-locals.el at the end of init.el."
+  (message "loading services")
  (when (boundp 'local-services)
   (dolist (x local-services)
 	(prodigy-define-service
@@ -1249,6 +1251,7 @@ ARG is the full path to the directory where you want to run the
 		  (lsp-deferred)
 		  (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local)
 		  (add-hook 'after-save-hook 'go-test nil 'make-it-local))))
+
 
 
 
@@ -1801,6 +1804,9 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 	"Window '%s' is normal")
  (current-buffer)))
 
+(require 'go-template-mode)
+(add-to-list 'auto-mode-alist '("\\.tmpl\\'" . go-template-mode))
+
 ;;; --------------------------------------------------------------------- SAMPLE DIR LOCAL
 
 ;; Example .dir-locals.el file.
@@ -1824,6 +1830,7 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 ;; byte-compile-warnings: (not free-vars)
 ;; sentence-end-double-space: nil
 ;; End:
+
 
 
 (message "end of init.el")
