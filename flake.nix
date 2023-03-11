@@ -60,12 +60,11 @@
             buildInputs = with pkgs; [
 	            pkgs.emacsGit
               unstablepkgs.go_1_20
-	      unstablepkgs.neovim
+	      pkgs.neovim
               unstablepkgs.gopls
               unstablepkgs.buf
               unstablepkgs.protoc-gen-go
               unstablepkgs.protoc-gen-go-grpc
-	      unstablepkgs.fzf
               unstablepkgs.protoc-gen-grpc-web
               pkgs.pandoc
               pkgs.ripgrep

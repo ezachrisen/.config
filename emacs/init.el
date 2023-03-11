@@ -24,7 +24,7 @@
 ;; Minimize garbage collection during startup
 (setq gc-cons-threshold most-positive-fixnum)
 
-(add-to-list 'load-path "~/.config/emacs")
+(add-to-list 'load-path "~/.config/emacs/lisp")
 
 
 ;; ---------------------------------------------------------------------- STARTUP
@@ -164,6 +164,10 @@
   :defer t
 )
 
+(use-package material-theme
+  :ensure t
+  :defer t)
+
 (use-package borland-blue-theme
   :ensure t
   :defer t)
@@ -187,12 +191,20 @@
 		  `(line-number ((t (:background unspecified :foreground "#7c6f64"))))
 		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
 		  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
+		((string= theme "material-light")
+		 'material-light
+		 (custom-theme-set-faces
+		  'material-light
+		  `(underline ((t (:underline nil))))
+		  `(vertical-border ((t (:background "#FAFAFA" :foreground "gray80"))))
+		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
+		  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
 		((string= theme "leuven")
 		 'leuven
 		 (custom-theme-set-faces
 		  'leuven
 		  `(underline ((t (:underline nil))))
-		  `(vertical-border ((t (:background "#ffffff" :foreground "gray80"))))
+		  `(vertical-border ((t (:background "#FFFFFF" :foreground "gray80"))))
 		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
 		  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
 		((string= theme "nord")
@@ -239,7 +251,6 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
 										(car (nth idx margins)) (cdr (nth idx margins)))))
 		  (set-window-margins (get-buffer-window)
 							  (car (nth idx margins)) (cdr (nth idx margins))))))
-
 
 ;;; --------------------------------------------------------------------- LINE NUMBERS
 
@@ -677,8 +688,9 @@ Use in `isearch-mode-end-hook'."
   (setq  projectile-indexing-method 'hybrid)
   :bind (("C-c p s" . 'helm-projectile-switch-project)
 		 ("C-c m" . 'projectile-compile-project)
-		 ("C-c C-f" . 'helm-projectile)
-		 ("C-c f" . 'helm-projectile)))
+		 ("C-c C-f" . 'helm-projectile)))
+
+;		 ("C-c f" . 'helm-projectile)))
 
 
 ;; Provides grepping files within a project.
@@ -824,6 +836,8 @@ Represents a preview of what a pull request diff will look like."
 		treemacs-deferred-git-apply-delay      0.5
 		treemacs-directory-name-transformer    #'identity
 		treemacs-display-in-side-window        nil)
+  (treemacs-fringe-indicator-mode 'always)
+  (treemacs-filewatch-mode t)
   (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)
   :bind (:map global-map
 			  ("C-x x" . treemacs-add-and-display-current-project)
@@ -842,8 +856,15 @@ Represents a preview of what a pull request diff will look like."
 
 (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
 
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
 
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
 
+;; #799B8E
 
 ;;; --------------------------------------------------------------------- COMPILATION
 
@@ -1745,6 +1766,7 @@ Toggle Windows
   ("l" ((lambda() (interactive) (load-theme 'leuven t))))
   ("n" ((lambda() (interactive) (load-theme 'nord t))))
   ("b" ((lambda() (interactive) (load-theme 'borland-blue t))))
+  ("f" ((lambda() (interactive) (load-theme 'material-light t))))
   ("|" display-fill-column-indicator-mode nil)
   ("z" wide-margins :color red)
   ("Z" ((lambda() (interactive) (wide-margins t))) :color red)
@@ -1831,9 +1853,214 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 ;; sentence-end-double-space: nil
 ;; End:
 
+(use-package fzf
+  :bind
+    ;; Don't forget to set keybinds!
+  :config
+  (setq fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
+        fzf/executable "fzf"
+        fzf/git-grep-args "-i --line-number %s"
+        ;; command used for `fzf-grep-*` functions
+        ;; example usage for ripgrep:
+        ;; fzf/grep-command "rg --no-heading -nH"
+        fzf/grep-command "grep -nrH"
+        ;; If nil, the fzf buffer will appear at the top of the window
+        fzf/position-bottom t
+        fzf/window-height 15))
 
+(global-set-key (kbd "C-c f") 'fzf-projectile)
 
 (message "end of init.el")
 
 ;;; init.el ends here
 
+(custom-set-faces
+ '(treemacs-root-face ((t (:height 1 :weight bold :foreground "#799B8E" )))))
+
+;; (use-package telephone-line
+;;   :custom 
+;;   (telephone-line-primary-left-separator 'telephone-line-cubed-hollow-left)
+;;   (telephone-line-secondary-left-separator 'telephone-line-flat)
+;;   (telephone-line-primary-right-separator 'telephone-line-cubed-right)
+;;   (telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+;;   (telephone-line-height 24)
+;;   (telephone-line-evil-use-short-tag t)  
+;;   :config
+;;   (telephone-line-defsegment telephone-line-pdf-segment ()
+;; 			     (if (eq major-mode 'pdf-view-mode)
+;; 				 (propertize (pdf-view-page-number)
+;; 					     'face '(:inherit)
+;; 					     'display '(raise 0.0)
+;; 					     'mouse-face '(:box 1)
+;; 					     'local-map (make-mode-line-mouse-map
+;; 							 'mouse-1 (lambda ()
+;; 								    (interactive)
+;; 								    (pdf-view-goto-page))))))
+;;   (telephone-line-defsegment telephone-line-winum-segment ()
+;; 			     (propertize winum--mode-line-segment
+;; 					 'face '(:box (:line-width 2 :color "cyan" :style released-button))		
+;; 					 'display '(raise 0.0)
+;; 					 'mouse-face '(:box 1)))
+;;   (setq telephone-line-lhs '((accent . (telephone-line-winum-segment
+;; 					telephone-line-pdf-segment
+;; 					telephone-line-vc-segment
+;; 					telephone-line-erc-modified-channels-segment
+;; 					telephone-line-process-segment))
+;; 			     (nil . (telephone-line-projectile-segment telephone-line-buffer-segment))))
+;;   (telephone-line-mode t))
+
+
+;; (use-package doom-modeline
+;;   :ensure t
+;;   :init (doom-modeline-mode 1)
+;;   :config
+;;   (setq doom-modeline-workspace-name t
+;; 		doom-modeline-lsp t
+;; 		doom-modeline-time t   
+;; ))
+
+;; (use-package telephone-line
+;;   :init
+;;   (defface +telephone/position-face '((t (:foreground "red" :background "grey10"))) "")
+;;   (defface +telephone/mode-face '((t (:foreground "white" :background "dark green"))) "")
+;;   (defface +telephone/file-info-face '((t (:foreground "white" :background "Dark Blue"))) "")
+;;   :custom
+;;   (telephone-line-faces
+;;    '((evil      . telephone-line-modal-face)
+;;      (modal     . telephone-line-modal-face)
+;;      (ryo       . telephone-line-ryo-modal-face)
+;;      (accent    . (telephone-line-accent-active . telephone-line-accent-inactive))
+;;      (nil         . (mode-line                    . mode-line-inactive))
+;;      (position  . (+telephone/position-face     . mode-line-inactive))
+;;      (mode      . (+telephone/mode-face         . mode-line-inactive))
+;;      (file-info . (+telephone/file-info-face    . mode-line-inactive))))
+;;   (telephone-line-primary-left-separator    'telephone-line-flat)
+;;   (telephone-line-secondary-left-separator  'telephone-line-flat)
+;;   (telephone-line-primary-right-separator   'telephone-line-flat)
+;;   (telephone-line-secondary-right-separator 'telephone-line-flat)
+;;   (telephone-line-height 24)
+;;   (telephone-line-evil-use-short-tag nil)
+;;   :config
+;;   (telephone-line-defsegment +telephone/buffer-or-filename ()
+;;     (cond
+;;      ((buffer-file-name)
+;;       (if (and (fboundp 'projectile-project-name)
+;;              (fboundp 'projectile-project-p)
+;;              (projectile-project-p))
+;;           (list ""
+;;                 (funcall (telephone-line-projectile-segment) face)
+;;                 (propertize
+;;                  (concat "/"
+;;                          (file-relative-name (file-truename (buffer-file-name))
+;;                                              (projectile-project-root)))
+;;                  'help-echo (buffer-file-name)))
+;;         (buffer-file-name)))
+;;      (t (buffer-name))))
+
+;;   (telephone-line-defsegment +telephone/get-position ()
+;;     `(,(concat "%lL:%cC"
+;;                (if (not mark-active)
+;;                    ""
+;;                  (format " | %dc" (- (+ 1 (region-end)) (region-beginning)))))))
+
+;;   (setq-default
+;;    telephone-line-lhs '((mode telephone-line-major-mode-segment)
+;;                         (file-info telephone-line-input-info-segment)
+;;                         (position +telephone/get-position)
+;;                         (accent   +telephone/buffer-or-filename
+;;                                   telephone-line-process-segment))
+;;    telephone-line-rhs '((accent telephone-line-flycheck-segment telephone-line-misc-info-segment
+;;                                 telephone-line-projectile-segment)
+;;                         (file-info telephone-line-filesize-segment)
+;;                         (evil  telephone-line-evil-tag-segment)))
+;;   (telephone-line-mode))
+
+
+
+
+
+(setq-default
+ mode-line-format
+ '((:eval
+    (ez/simple-mode-line-render
+     ;; Left side
+    (quote (
+			(:eval (ez/change-indicator))
+             "%12b" ; mode-line-buffer-identification
+             ))
+     ;; Right right side
+     (quote (
+			 (:eval (ez/short-directory-name 20))
+			 " "
+			 (:eval (ez/mode-name))
+			 " "
+			 (:eval (ez/lsp-name))
+			 " %I "
+			 "  %l:%C "
+			 (vc-mode vc-mode)
+			 " "
+			 ))))))
+
+; To make a vertical bar: ⎜
+
+(defun ez/change-indicator()
+  "A graphical representation of whether the buffer is modified or not."
+  (if (buffer-modified-p)
+		(concat "  ")
+		(concat "  ")))
+
+(defun ez/mode-name()
+  "How to display the major mode name in the mode line."
+  (concat " " (downcase mode-name)))
+
+(defun ez/lsp-name()
+  "The text to display when LSP is enabled and connected to an LSP server."
+  (when (fboundp 'lsp-workspaces)
+	(let ((servers (mapconcat #'lsp--workspace-print (lsp-workspaces) " ")))
+	  (when (not (string= servers ""))
+		(format "﮼ %s " servers)))))
+
+;; (defun ez/col-line()
+;;   "Text displayed for the column and line location in the mode line."
+
+
+(defun ez/simple-mode-line-render (left right)
+  "Return a string of `window-width' length.
+Containing LEFT, and RIGHT aligned respectively. Used to format the modeline text."
+  (let ((available-width
+         (- (window-total-width)
+            (+ (length (format-mode-line left))
+               (length (format-mode-line right))))))
+    (append left
+            (list (format (format "%%%ds" available-width) ""))
+            right)))
+
+
+
+
+(advice-add #'vc-git-mode-line-string :filter-return #'ez/replace-git-status)
+(defun ez/replace-git-status (tstr)
+  "Advice to reformat the Git mode line string (TSTR)."
+  (let* ((tstr (replace-regexp-in-string "Git" "" tstr))
+         (first-char (substring tstr 0 1))
+         (rest-chars (substring tstr 1)))
+    (concat "  " (cond
+     ((string= ":" first-char) ;;; Modified
+      (replace-regexp-in-string "^:" "" tstr))
+     ((string= "-" first-char) ;; No change
+      (replace-regexp-in-string "^-" "" tstr))
+     (t tstr)))))
+
+
+(defun  ez/short-directory-name(maxlength)
+  "Make a short directory name, up to MAXLENGTH characters long."
+  (and (stringp (buffer-file-name))
+	   (let ((name (abbreviate-file-name (directory-file-name (file-name-directory (buffer-file-name))))))
+		 (ez/shorten-name name maxlength))))
+
+(defun ez/shorten-name(name maxlength)
+  "Recursively shorten the directory NAME by removing elements of the path starting at the front, as long as there are path elements to remove and the length of the string exceeds MAXLENGTH."
+  (when (and (> (length name) maxlength) (string-match "/" name))
+	(let ((arr (split-string name "/")))
+	  (setq name (ez/shorten-name (combine-and-quote-strings (cons ".." (cdr (cdr arr))) "/") maxlength))))
+  name)
