@@ -24,10 +24,10 @@ end
 
 function M.TestPackage(dir)
   vim.cmd(string.format([[
- vert 60 copen
+ vertical 30 copen | wincmd L
  lcd %s
- AsyncRun -mode=async -pos=right -cols=80 -cwd=%s -focus=0 %s go test %s %s
- ]], dir, dir, go_test_env_string, testVerbose(), testTags()))
+ AsyncRun -mode=async -pos=right -cols=40 -cwd=%s -focus=0 %s go test %s %s %s
+ ]], dir, dir, go_test_env_string, testRun(), testVerbose(), testTags()))
 end
 
 function testVerbose()
@@ -36,6 +36,16 @@ function testVerbose()
     return ""
   end
   return "-v"
+end
+
+-- Return go test tags prefixed with -tags
+-- If no tags, returns nothing
+function testRun()
+  if (go_test_run == "")
+  then
+    return ""
+  end
+  return "--run=" .. go_test_run
 end
 
 -- Return go test tags prefixed with -tags

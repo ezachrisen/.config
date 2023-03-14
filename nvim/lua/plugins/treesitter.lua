@@ -32,7 +32,7 @@ return {
         "vim",
         "yaml",
         "zig",
-        ensure_installed = {},
+        ensure_installed = { "go", "regex", "gomod", "markdown" },
         highlight = { enable = true },
         rainbow = {
           enable = true,

@@ -1,8 +1,12 @@
-vim.api.nvim_create_autocmd("QuickFixCmdPost", {
-  group = vim.api.nvim_create_augroup("AutoOpenQuickfix", { clear = true }),
-  pattern = { "[^l]*" },
-  command = "cwindow"
-})
+-- vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+--   group = vim.api.nvim_create_augroup("AutoOpenQuickfix", { clear = true }),
+--   --  pattern = { "[^l]*" },
+--   command = [[
+--     echo "running autocommand "
+--     cwindow
+--   wincmd L
+--   ]]
+-- })
 
 -- vim.api.nvim_create_autocmd("FileType", {
 --   pattern = { "sh", "go", "rust" },
@@ -13,6 +17,8 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.mdx" },
   command = "set filetype=markdown"
 })
+
+
 
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "*",

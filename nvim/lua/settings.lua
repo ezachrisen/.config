@@ -23,7 +23,7 @@ vim.o.shiftwidth = 2
 -- vim.o.shortmess = vim.o.shortmess .. "c" -- .. is equivalent to += in vimscript
 vim.o.shortmess = "filnxToOc" -- copied default and removed `t` (long paths were being truncated) while adding `c`
 vim.o.showmatch = true
-vim.o.signcolumn = "auto"
+-- vim.o.signcolumn = "auto"
 vim.o.smartcase = true
 vim.o.smartindent = true
 vim.o.spell = false
@@ -36,7 +36,7 @@ vim.o.wrap = false
 vim.g.incsearch = true
 vim.wo.relativenumber = true
 --vim.opt.autochdir = true
-vim.cmd("set signcolumn=yes:4")
+vim.cmd("set signcolumn=yes:2")
 
 -- if vim.fn.has("termguicolors") == 1 then
 vim.o.termguicolors = true
@@ -190,7 +190,7 @@ notify.setup({
   },
   level = 2,
   minimum_width = 50,
-  render = "compact",
+  render = "default",
   stages = "fade_in_slide_out",
   timeout = 5000,
   top_down = false

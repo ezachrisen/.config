@@ -91,9 +91,9 @@
 
             shellHook = ''
               echo "Welcome to Nix shell"
+              source ./git-prompt.sh
               emacs () {
               # Added to .bashrc to set the TERM info for Emacs
-              echo "running emacs func"
                   if test -f "$HOME/.terminfo/x/xterm-emacs-leg" && ( test "$LC_TERMINAL" == "iTerm2"  || test "$COLORTERM" == "truecolor" )
                   then
                       TERM=xterm-emacs-leg command emacs "$@"
@@ -105,6 +105,11 @@
               ./emacs_terminfo.sh
               force_color_prompt=yes
               export COLORTERM=truecolor
+              export GIT_PS1_SHOWDIRTYSTATE=true
+              export GIT_PS1_SHOWCOLORHINTS=true 
+              RED="$(tput setaf 1)"
+              RESET="$(tput sgr0)"
+              PS1='\[\033[01;32m\]\h\[\033[00m\] \W$(__git_ps1 " ''${RED}(%s)''${RESET}") $ '
             '';
 
             MY_NAME = "cow";

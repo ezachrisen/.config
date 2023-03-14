@@ -126,6 +126,9 @@ return {
             }
           }
         },
+        messages = {
+          enabled = false,
+        },
         popupmenu = {
           relative = "editor",
           position = { row = 8, col = "50%" },
@@ -148,7 +151,35 @@ return {
             find = "written"
           },
           opts = { skip = true }
-        }
+        },
+
+        {
+          view = "split",
+          filter = { event = "msg_show", min_height = 20 },
+        },
+
+
+        {
+          filter = {
+            event = "msg_show",
+            find = "--%d+%%--",
+          },
+          opts = { skip = true },
+        },
+        {
+          filter = {
+            event = "msg_show",
+            find = "--No lines in buffer--",
+          },
+          opts = { skip = true },
+        },
+        {
+          filter = {
+            event = "msg_show",
+            kind = "search_count",
+          },
+          opts = { skip = true },
+        },
       },
       presets = { long_message_to_split = true, lsp_doc_border = true },
       documentation = {
@@ -170,7 +201,6 @@ return {
   {
     "rcarriga/nvim-notify",
   },
-
   {
     -- TAB UI IMPROVEMENTS
     "akinsho/bufferline.nvim",
