@@ -5,6 +5,7 @@ local go_test_tags_string = "spanner,firestore,integration"
 local go_test_verbose = false
 local go_test_run = ""
 local go_test_env_string = ""
+local go_test_home = ""
 
 function M.ToggleQuickFix()
   local qf_exists = false
@@ -23,11 +24,15 @@ function M.ToggleQuickFix()
 end
 
 function M.TestPackage(dir)
+  if (go_test_home ~= "") then
+    dir = go_test_home
+  end
   vim.cmd(string.format([[
- vertical 30 copen | wincmd L
- lcd %s
- AsyncRun -mode=async -pos=right -cols=40 -cwd=%s -focus=0 %s go test %s %s %s
- ]], dir, dir, go_test_env_string, testRun(), testVerbose(), testTags()))
+   compiler go
+  vertical 30 copen | wincmd L
+  lcd %s
+  AsyncRun -mode=async -pos=right -cols=40 -cwd=%s  -focus=0 %s go test %s %s %s
+  ]], dir, dir, go_test_env_string, testRun(), testVerbose(), testTags()))
 end
 
 function testVerbose()
@@ -139,6 +144,7 @@ local hint = [[
   _t_ -tags=%{tags}
   _r_ -run=%{run}
   _e_ env=%{env}
+  _h_ test home=%{test_home}
   ^
        ^^^^                _<Esc>_
 ]]
@@ -160,6 +166,7 @@ gohydra = Hydra({
         verbose = function() return flag(go_test_verbose) end,
         short = function() return flag(go_test_short) end,
         env = function() return go_test_env_string end,
+        test_home = function() return go_test_home end,
       }
     }
   },
@@ -168,10 +175,15 @@ gohydra = Hydra({
   heads = {
     { 's', function() go_test_short = not go_test_short end,     { desc = 'short' } },
     { 'v', function() go_test_verbose = not go_test_verbose end, { desc = 'verbose' } },
+    { 'h', function()
+      M.input("Home directory for go test", go_test_home,
+        function(val)
+          go_test_home = val
+        end)
+    end, { exit = true, desc = 'set go test home directory' } },
     { 'r', function()
       M.input("go test -run=", go_test_run,
         function(val)
-          print("FINISHED", val)
           go_test_run = val
         end)
     end, { exit = true, desc = 'set go run tag' } },

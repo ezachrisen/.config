@@ -53,7 +53,7 @@ return {
       custom_gruvbox.insert.a.bg = '#fe8019'
       custom_gruvbox.insert.a.fg = '#282828'
       local function current_time()
-        return os.date('%I:%M %p', os.time() - (6 * 60 * 60))
+        return os.date('%I:%M %p', os.time() - (5 * 60 * 60))
       end
       require("lualine").setup({
         options = {
@@ -222,26 +222,26 @@ return {
   "junegunn/fzf",
   build = function() vim.fn["fzf#install"]() end
 },
-  --   {
-  --   -- QUICKFIX IMPROVEMENTS
-  --   --
-  --   -- <Tab> to select items.
-  --   -- zn to keep selected items.
-  --   -- zN to filter selected items.
-  --   -- zf to fuzzy search items.
-  --   --
-  --   -- <Ctrl-f> scroll down
-  --   -- <Ctrl-b> scroll up
-  --   "kevinhwang91/nvim-bqf",
-  --   ft = "qf",
-  --   config = function()
-  --     require('bqf').setup({
-  --       preview = {
-  --         wrap = true
-  --       }
-  --     })
-  --   end
-  -- },
+  {
+    -- QUICKFIX IMPROVEMENTS
+    --
+    -- <Tab> to select items.
+    -- zn to keep selected items.
+    -- zN to filter selected items.
+    -- zf to fuzzy search items.
+    --
+    -- <Ctrl-f> scroll down
+    -- <Ctrl-b> scroll up
+    "kevinhwang91/nvim-bqf",
+    ft = "qf",
+    config = function()
+      require('bqf').setup({
+        preview = {
+          wrap = true
+        }
+      })
+    end
+  },
   -- }, {
   --   -- WINDOW BAR BREADCRUMBS
   --   "utilyre/barbecue.nvim",

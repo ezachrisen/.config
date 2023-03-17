@@ -4,6 +4,8 @@ vim.keymap.set("", "<leader><leader>pc", ":PackerCompile<CR>:echo 'PackerCompile
 
 vim.keymap.set("", "±", "<Cmd>nohlsearch<CR>", { desc = "turn off search highlight" })
 vim.keymap.set("", "<leader>c", "<Cmd>cclose<CR>", { desc = "close the quickfix window" })
+vim.keymap.set("", "<C-]>", "<Cmd>cnext<CR>", { desc = "next error in quickfix window" })
+vim.keymap.set("", "<C-[>", "<Cmd>cprev<CR>", { desc = "prev error in quickfix window" })
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "scroll down and then center the cursorline" })
 vim.keymap.set("n", "<leader>p", function() require 'telescope'.extensions.projects.projects {} end)

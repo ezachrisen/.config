@@ -903,15 +903,15 @@ Represents a preview of what a pull request diff will look like."
   (ansi-color-apply-on-region compilation-filter-start (point))
   (read-only-mode 1))
 
-(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+;; (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 
-(add-hook 'compilation-mode-hook
-		  (lambda ()
-			(font-lock-add-keywords nil
-									'((" "
-									   (0 '(face nil font-lock-face nil
-												 compilation-message nil help-echo nil mouse-face nil) t)))
-									'append)))
+;; (add-hook 'compilation-mode-hook
+;; 		  (lambda ()
+;; 			(font-lock-add-keywords nil
+;; 									'((" "
+;; 									   (0 '(face nil font-lock-face nil
+;; 												 compilation-message nil help-echo nil mouse-face nil) t)))
+;; 									'append)))
 
 
 
@@ -1262,6 +1262,27 @@ ARG is the full path to the directory where you want to run the
 		  (lambda()
 			(message "****************************** Loading go-ts-mode hook")
 			(common-go-setup)))
+
+
+  (pretty-hydra-define hydra-go-test
+	(:title "Go Test" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
+	("Test"
+	 (("m" ((lambda()(go-test t))) "module")
+	 ("p" go-test "package")
+	 ("o" go-test-package-only "package only on save" :toggle t)
+	 ("c" go-test-coverage-in-emacs "coverage")
+	 ("b" go-test-module-benchmarks "benchmarks")
+	 ("e" go-test-env (go-test-env-display))
+	 ("u" go-test-run (go-test-run-display))
+	 ("g" go-test-tags (go-test-tags-display))
+	 ("z" go-test-timeout (go-test-timeout-display))
+	 ("s" go-test-short "short" :toggle t)
+	 ("v" go-test-verbose "verbose" :toggle t)
+	 ("h" go-test-path (go-test-path-display))
+	 ("t" ((lambda()(interactive)(toggle-window "*compilation*"))) "toggle *compilation*")
+	 )))
+(global-set-key (kbd "C-c t") 'hydra-go-test/body)
+
 
 
 (defun common-go-setup() 
@@ -1859,8 +1880,10 @@ Emacs will not reuse a dedicated window for output, such as compilation."
   :bind
   ;; Don't forget to set keybinds!
   :config
-  (setq fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
-        fzf/executable "fzf"
+  (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll "
+		;; fzf/args "-x --print-query --margin=1,0 --no-hscroll --preview 'bat --color=always --style=header,grid --line-range :300 {}'"
+        fzf/args-for-preview "--preview 'bat --color=always --style=header,grid --line-range :100 {}'"
+		fzf/executable "fzf"
         fzf/git-grep-args "-i --line-number %s"
         ;; command used for `fzf-grep-*` functions
         ;; example usage for ripgrep:
@@ -2164,3 +2187,64 @@ Containing LEFT, and RIGHT aligned respectively. Used to format the modeline tex
 	:load-path "~/.config/emacs/local/treemacs-devicons"
 	:config
 	(treemacs-load-theme "devicons"))
+
+
+
+(defun wordp (c) (= ?w (char-syntax c)))
+(defun lowercasep (c) (and (wordp c) (= c (downcase c))))
+(defun uppercasep (c) (and (wordp c) (= c (upcase c))))
+
+(defun toggle-letter-case ()
+  (interactive)
+  (save-excursion
+	(setq p1 (point))
+	(right-char)
+	(setq p2 (point)))
+  (if (lowercasep (char-after))
+	  (upcase-region p1 p2)
+	(downcase-region p1 p2)))
+
+
+(global-set-key (kbd "M-1") 'toggle-letter-case)
+
+;; (add-hook 'compilation-mode-hook
+;;   (lambda() 
+;; 	(message "In compilation node hook")
+;; (font-lock-add-keywords 'compilation-mode
+;;  '(("FIXME" 1 font-lock-warning-face prepend)
+;;    ("\\<\\(and\\|or\\|not\\)\\>" . font-lock-keyword-face)))))
+
+;; 	(font-lock-add-keywords 'compilation-mode
+;; 	  '(("PASS"  1 font-lock-warning-face prepend)))))
+
+
+(defgroup ez-compilation-group nil
+  "Group for customization"
+  :prefix "ez-")
+
+(defface ez-highlight-go-pass-face
+  '((t :inherit (default)
+	   :background "#b8bb26"
+       :foreground "#000000"))
+  "Face to highlight that Go test passed"
+  :group 'ez-compilation-group)
+
+(defface ez-highlight-go-fail-face
+  '((t :inherit (default)
+	   :background "firebrick"
+       :foreground "#ffffff"))
+  "Face to highlight that Go test failed"
+  :group 'ez-compilation-group)
+
+
+
+(add-hook 'compilation-mode-hook
+          (lambda ()
+			(message "In 2nd compilation hook")
+            (font-lock-add-keywords nil
+                                    '(("\\(PASS\\)[^:]" 1 'ez-highlight-go-pass-face t)
+                                      ("\\(FAIL\\)[^:]" 1 'ez-highlight-go-fail-face t)))
+			(font-lock-fontify-buffer)))
+
+
+

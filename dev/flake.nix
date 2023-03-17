@@ -70,6 +70,7 @@
               pkgs.pandoc
               pkgs.ripgrep
 	      pkgs.docker
+	      pkgs.bat
               #pkgs.cmake
               #pkgs.clang
               #pkgs.ninja
