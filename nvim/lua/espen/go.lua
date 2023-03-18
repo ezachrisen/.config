@@ -165,7 +165,7 @@ gohydra = Hydra({
         run = function() return go_test_run end,
         verbose = function() return flag(go_test_verbose) end,
         short = function() return flag(go_test_short) end,
-        env = function() return go_test_env_string end,
+        env = function() return string.sub(go_test_env_string, 1, 20) end,
         test_home = function() return go_test_home end,
       }
     }
