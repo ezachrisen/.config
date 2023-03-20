@@ -1,14 +1,9 @@
-vim.keymap.set("", "<leader><leader>ps", "<Cmd>PackerSync<CR>", { desc = "update vim plugins" })
-vim.keymap.set("", "<leader><leader>pc", ":PackerCompile<CR>:echo 'PackerCompile complete'<CR>",
-  { desc = "packer compile" })
-
-vim.keymap.set("", "±", "<Cmd>nohlsearch<CR>", { desc = "turn off search highlight" })
 vim.keymap.set("", "<leader>c", "<Cmd>cclose<CR>", { desc = "close the quickfix window" })
 vim.keymap.set("", "<C-]>", "<Cmd>cnext<CR>", { desc = "next error in quickfix window" })
 vim.keymap.set("", "<C-[>", "<Cmd>cprev<CR>", { desc = "prev error in quickfix window" })
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "scroll down and then center the cursorline" })
-vim.keymap.set("n", "<leader>p", function() require 'telescope'.extensions.projects.projects {} end)
+vim.keymap.set("n", "<leader>fp", function() require 'telescope'.extensions.projects.projects {} end)
 vim.keymap.set("n", "<leader><leader>n", "<Cmd>set norelativenumber number<CR>")
 vim.keymap.set("n", "<leader><leader>o", "<Cmd>set norelativenumber nonumber<CR>")
 vim.keymap.set("n", "<leader>h", "<Cmd>nohlsearch<cr>")
@@ -19,6 +14,10 @@ vim.keymap.set("n", "<C-c>s", "<Cmd>set mouse=nvi<CR>")
 vim.keymap.set("n", "<C-c>k", "<Cmd>set mouse=<CR>")
 vim.keymap.set("n", "<leader>m", "<Cmd>make<CR>", { desc = "run make" })
 vim.keymap.set("n", "<leader>cl", "<Cmd>colorscheme leuven<CR>", { desc = "leuven" })
+
+vim.keymap.set('n', "<leader>c", function() require("espen.go").ToggleQuickFix() end)
+vim.keymap.set('n', '<leader>tp', function() require("espen.go").TestPackage(vim.fn.expand('%:p:h')) end)
+vim.keymap.set('n', '<leader>o', function() require("espen.go").GoMenu() end)
 
 -- file opening commands
 vim.keymap.set("n", "<leader>cd", "<Cmd>cd %:p:h<CR>", { desc = "open file in folder relative to current file" })

@@ -162,6 +162,20 @@ return {
         {
           filter = {
             event = "msg_show",
+            find = "E553: No more items",
+          },
+          opts = { skip = true },
+        },
+        {
+          filter = {
+            event = "msg_show",
+            find = "E42: No errors",
+          },
+          opts = { skip = true },
+        },
+        {
+          filter = {
+            event = "msg_show",
             find = "--%d+%%--",
           },
           opts = { skip = true },

@@ -18,7 +18,7 @@ return {
       vim.fn.sign_define("DiagnosticSignHint",
         { text = "", texthl = "DiagnosticSignHint" })
 
-      vim.keymap.set("n", "<leader>t", "<Cmd>Neotree toggle<CR>",
+      vim.keymap.set("n", "<leader>x", "<Cmd>Neotree toggle<CR>",
         { desc = "open file tree" })
       vim.keymap.set("n", "gp", "<Cmd>Neotree reveal_force_cwd<CR>", {
         desc = "change working directory to current file location"
