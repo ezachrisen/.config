@@ -169,7 +169,7 @@ return {
         {
           filter = {
             event = "msg_show",
-            find = "E42: No errors",
+            find = "E42",
           },
           opts = { skip = true },
         },

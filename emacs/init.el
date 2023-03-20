@@ -1525,6 +1525,7 @@ This variable is here just to inform the Hydra so it can display the status corr
 	  (quit-window nil (get-buffer-window name))
 	(display-buffer name)))
 
+(winner-mode +1)
 
 ;; Easily navigate between windows
 (use-package windmove
@@ -1628,9 +1629,11 @@ If negative, make shorter."
 Toggle Windows
    "
   ("q" nil "quit")
+  ("u" winner-undo "undo" :column "Layout")
+  ("r" winnder-redo "redo")
+
+  ("c" ((lambda() (interactive) (toggle-window "*compilation*"))) "compilation" :column "Compilation")
   ("m" ((lambda() (interactive) (toggle-window "*Messages*"))) "messages")
-  ("c" ((lambda() (interactive) (toggle-window "*compilation*"))) "compilation" 
-   :column "Compilation")
   ("h" ((lambda() (interactive) (toggle-window "*Help*"))) "help" :column "Help")
 
   ("b" ((lambda() (interactive) (toggle-window "*Backtrace*"))) "backtrace")
