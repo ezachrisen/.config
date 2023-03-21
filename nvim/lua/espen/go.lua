@@ -1,11 +1,12 @@
 local Hydra = require('hydra')
 local M = {}
 
-local go_test_tags_string = "spanner,firestore,integration"
+local go_test_tags_string = ""
 local go_test_verbose = false
 local go_test_run = ""
 local go_test_env_string = ""
 local go_test_home = ""
+local raw_output_flag = false
 
 function M.ToggleQuickFix()
   local qf_exists = false
@@ -27,12 +28,13 @@ function M.TestPackage(dir)
   if (go_test_home ~= "") then
     dir = go_test_home
   end
+  print("Running 'go test' in ", dir, "with raw = ", rawOutput())
   vim.cmd(string.format([[
    compiler go
   vertical 30 copen | wincmd L
   lcd %s
-  AsyncRun -mode=async -pos=right -cols=40 -cwd=%s  -focus=0 %s go test %s %s %s
-  ]], dir, dir, go_test_env_string, testRun(), testVerbose(), testTags()))
+  AsyncRun -mode=async -pos=right -cols=40 %s -cwd=%s  -focus=0 %s go test %s %s %s
+  ]], dir, rawOutput(), dir, go_test_env_string, testRun(), testVerbose(), testTags()))
 end
 
 function testVerbose()
@@ -41,6 +43,16 @@ function testVerbose()
     return ""
   end
   return "-v"
+end
+
+-- Return go test tags prefixed with -tags
+-- If no tags, returns nothing
+function rawOutput()
+  if (not raw_output_flag)
+  then
+    return ""
+  end
+  return "-raw"
 end
 
 -- Return go test tags prefixed with -tags
@@ -63,90 +75,28 @@ function testTags()
   return "--tags=" .. go_test_tags_string
 end
 
--- echo bufnr('%')
--- local outputbufnr = 27
--- local command = {"go", "test", "-v", "./..." }
-
--- local test_command = function(dir)
---   local val = "cd " .. dir .. " && go test -v ./... "
---   -- local val={"cd ", dir, "go" , "test", "-v", "./..."}
---   return val
--- end
-
-
---   vim.api.nvim_create_autocmd("BufWritePost", {
---       group = vim.api.nvim_create_augroup("ezgo", {clear = true}),
---       pattern = pattern,
---       callback = function()
---         local lines = {}
---         local bufdir = vim.fn.expand('%:p:h')
---        -- bufdir = "/home/espen.zachrisen/maui/api"
---           vim.api.nvim_buf_set_lines(outputbufnr, 0, -1, false, {bufdir})
-
---           local scroll_to_bottom = function(bufnr)
---             local winid = vim.fn.bufwinid(bufnr)
---             local lines = vim.api.nvim_buf_line_count(outputbufnr)
---             vim.api.nvim_win_set_cursor(winid,{lines,0})
---           end
-
---           local append_data = function(_, data)
---             if data then
---               vim.api.nvim_buf_set_lines(outputbufnr, -1,-1, false, data)
---               scroll_to_bottom(outputbufnr)
---             end
---           end
-
-
---         local finish = function()
---           vim.api.nvim_buf_set_lines(outputbufnr, -1, -1, false, {"Done!"})
---           scroll_to_bottom(outputbufnr)
---           vim.fn.setqflist({}, 'r', {
---             title = "SOMETHING",
---             lines = lines,
---             efm = "%f:%l: ",
---           })
---           vim.cmd([[doautocmd QuickFixCmdPost]])
---         end
-
-
-
---           -- vim.api.nvim_buf_set_lines(outputbufnr, 0, -1, false, {"go test output:"})
---           vim.fn.jobstart(test_command(bufdir), {
---               stderr_buffered = false,
---               stdout_buffered = false,
---               on_stdout = append_data,
---               on_stderr = append_data,
---               on_:exit = finish,
---             })
---           end,
---         })
---       end
-
-
--- attach_to_buffer(outputbufnr, "*.go", {"go", "test", "-v", "./..."})
-
-
-
 local flag = function(val)
   if val then
-    return '[x]'
+    return ''
   else
-    return '[ ]'
+    return ''
   end
 end
 
 
 local hint = [[
-  ^ ^        Options
   ^
-  _v_ %{verbose} verbose
-  _s_ %{short} short
+  Go test options
+  ^
+  _v_ %{verbose} verbose      _s_ %{short} short    _o_ %{raw} raw output ^^^
+  ^^
   _t_ -tags=%{tags}
   _r_ -run=%{run}
   _e_ env=%{env}
   _h_ test home=%{test_home}
   ^
-       ^^^^                _<Esc>_
+  _q_
+  ^
 ]]
 
 
@@ -164,6 +114,7 @@ gohydra = Hydra({
         tags = function() return go_test_tags_string end,
         run = function() return go_test_run end,
         verbose = function() return flag(go_test_verbose) end,
+        raw = function() return flag(raw_output_flag) end,
         short = function() return flag(go_test_short) end,
         env = function() return string.sub(go_test_env_string, 1, 20) end,
         test_home = function() return go_test_home end,
@@ -174,7 +125,8 @@ gohydra = Hydra({
   body = '<Leader>o',
   heads = {
     { 's', function() go_test_short = not go_test_short end,     { desc = 'short' } },
-    { 'v', function() go_test_verbose = not go_test_verbose end, { desc = 'verbose' } },
+    { 'v', function() go_test_verbose = not go_test_verbose end, { desc = 'raw output' } },
+    { 'o', function() raw_output_flag = not raw_output_flag end, { desc = 'verbose' } },
     { 'h', function()
       M.input("Home directory for go test", go_test_home,
         function(val)
@@ -199,7 +151,7 @@ gohydra = Hydra({
           go_test_tags_string = val
         end)
     end, { exit = true, desc = 'set go test tag' } },
-    { '<Esc>', nil, { exit = true } }
+    { 'q', nil, { exit = true } }
   }
 })
 

@@ -1,6 +1,8 @@
 return {
   {
-
+    {
+      "tpope/vim-abolish",
+    },
     -- {
     --   -- SEARCH INDEXER
     --   "kevinhwang91/nvim-hlslens",

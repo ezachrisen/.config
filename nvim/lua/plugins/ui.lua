@@ -77,6 +77,7 @@ return {
               },
             },
           },
+          lualine_y = { 'location' },
           lualine_z = { current_time },
         }
       })
@@ -162,10 +163,16 @@ return {
         {
           filter = {
             event = "msg_show",
-            find = "E553: No more items",
+            find = "wrappedit",
           },
           opts = { skip = true },
+        }, {
+        filter = {
+          event = "msg_show",
+          find = "E553: No more items",
         },
+        opts = { skip = true },
+      },
         {
           filter = {
             event = "msg_show",

@@ -110,7 +110,19 @@ return {
           color = "warning",
           alt = { "WARNING", "XXX", "IMPORTANT" }
         }
-      }
+      },
+      search = {
+        command = "rg",
+        args = {
+          "--color=never",
+          "--no-heading",
+          "--with-filename",
+          "--line-number",
+          "--column",
+          "--glob=!node_modules",
+        },
+        pattern = [[\b(KEYWORDS):]],
+      },
     })
   end
 },
