@@ -555,12 +555,12 @@ Use in `isearch-mode-end-hook'."
 (use-package hydra
   :ensure t)
 
-;; Enable a single key binding to call up mode-specific Hydra.
+;; ;; Enable a single key binding to call up mode-specific Hydra.
 (use-package major-mode-hydra
   :ensure t
   :demand t
-  :bind
-  ("C-c c" . major-mode-hydra)
+  ;; :bind
+  ;; ("C-c c" . major-mode-hydra)
   :config
   (setq major-mode-hydra-separator "-")
   (setq major-mode-hydra-invisible-quit-key "q"))
@@ -1256,51 +1256,51 @@ ARG is the full path to the directory where you want to run the
 
 										;: shortcut to this location: gox
 
-(use-package go-mode
-  :ensure t
-  :defer t
-   :mode "\\(\\.go\\|go.mod\\|go.sum\\)\\'"
-  ;;:mode "\\.go\\"
-  :mode-hydra
-  ((:title "Go" :separator " " :formatter my-hydra-formatter :idle 0.5)
-   ("Testing"
-	(("m" ((lambda()(go-test t))) "module")
-	 ("t" go-test "package")
-	 ("o" go-test-package-only "package only on save" :toggle t)
-	 ("c" go-test-coverage-in-emacs "coverage")
-	 ("b" go-test-module-benchmarks "benchmarks")
-	 ("e" go-test-env (go-test-env-display))
-	 ("u" go-test-run (go-test-run-display))
-	 ("g" go-test-tags (go-test-tags-display))
-	 ("z" go-test-timeout (go-test-timeout-display))
-	 ("s" go-test-short "short" :toggle t)
-	 ("v" go-test-verbose "verbose" :toggle t)
-	 ("h" go-test-path (go-test-path-display))
-	 )
-	"Lint"
-	(("x" ((lambda()(go-lint t)))  "module")
-	 ("l" go-lint "package")
-	 )
-	"Navigation"
-	(("a" go-open-alternate-file "alternate file")
-	 ("f" helm-projectile "find file")
-	 ("i" lsp-ui-imenu "imenu"))
-	"Git"
-	(("d" magit-diff-to-main "diff to main"))
-	"Misc"
-	(("k" go-generate-module "go generate")
-	 ("r" lsp-rename "rename")
-	 )))
-  :config
-  (add-to-list 'auto-mode-alist '("\\.gohtml\\'" . html-mode))
-  (setq gofmt-command "goimports")
-  (add-hook 'go-mode-hook
-			(lambda ()	
-			  (message "loading go-mode hook")
-			  (common-go-setup))))
+;; (use-package go-mode
+;;   :ensure t
+;;   :defer t
+;;    :mode "\\(\\.go\\|go.mod\\|go.sum\\)\\'"
+;;   ;;:mode "\\.go\\"
+;;   :mode-hydra
+;;   ((:title "Go" :separator " " :formatter my-hydra-formatter :idle 0.5)
+;;    ("Testing"
+;; 	(("m" ((lambda()(go-test t))) "module")
+;; 	 ("t" go-test "package")
+;; 	 ("o" go-test-package-only "package only on save" :toggle t)
+;; 	 ("c" go-test-coverage-in-emacs "coverage")
+;; 	 ("b" go-test-module-benchmarks "benchmarks")
+;; 	 ("e" go-test-env (go-test-env-display))
+;; 	 ("u" go-test-run (go-test-run-display))
+;; 	 ("g" go-test-tags (go-test-tags-display))
+;; 	 ("z" go-test-timeout (go-test-timeout-display))
+;; 	 ("s" go-test-short "short" :toggle t)
+;; 	 ("v" go-test-verbose "verbose" :toggle t)
+;; 	 ("h" go-test-path (go-test-path-display))
+;; 	 )
+;; 	"Lint"
+;; 	(("x" ((lambda()(go-lint t)))  "module")
+;; 	 ("l" go-lint "package")
+;; 	 )
+;; 	"Navigation"
+;; 	(("a" go-open-alternate-file "alternate file")
+;; 	 ("f" helm-projectile "find file")
+;; 	 ("i" lsp-ui-imenu "imenu"))
+;; 	"Git"
+;; 	(("d" magit-diff-to-main "diff to main"))
+;; 	"Misc"
+;; 	(("k" go-generate-module "go generate")
+;; 	 ("r" lsp-rename "rename")
+;; 	 )))
+;;   :config
+;;   (add-to-list 'auto-mode-alist '("\\.gohtml\\'" . html-mode))
+;;   (setq gofmt-command "goimports")
+;;   (add-hook 'go-mode-hook
+;; 			(lambda ()	
+;; 			  (message "loading go-mode hook")
+;; 			  (common-go-setup))))
 
 
-
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
 (add-hook 'go-ts-mode-hook 
 		  (lambda()
 			(common-go-setup)))
@@ -1323,25 +1323,27 @@ ARG is the full path to the directory where you want to run the
 	 ("h" go-test-path (go-test-path-display))
 	 ("t" ((lambda()(interactive)(toggle-window "*compilation*"))) "toggle *compilation*")
 	 )))
+
 (global-set-key (kbd "C-c t") 'hydra-go-test/body)
 
-
+(require 'gofmt)
 
 (defun common-go-setup() 
   (hack-dir-local-variables-non-file-buffer)		 ; load .dir-locals.el
+
   (define-pkgsite-service go-package-site-dir)		 ; set dir for Go doc server
   (define-local-services)							 
-  (modify-syntax-entry ?= "w" go-mode-syntax-table)	 ; make = part of a word
-  (modify-syntax-entry ?.  "_" go-mode-syntax-table) ; make . part of a word
   (if (not (string-match "go" compile-command))		 ; set default compile command
 	  (set (make-local-variable 'compile-command)
 		   "go build -v && go test -v -short && go vet"))
   (setq fill-column 90)
   (setq tab-width 2)
+  (setq gofmt-command "goimports")
   (company-mode)
+  (electric-pair-mode)
   (lsp)
-  (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local)
-  (add-hook 'after-save-hook 'go-test nil 'make-it-local))
+  (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local))
+;  (add-hook 'after-save-hook 'go-test nil 'make-it-local))
 
 
 ;; --------------------------------------------------------------------- MISC LANGUAGES
@@ -1376,21 +1378,21 @@ ARG is the full path to the directory where you want to run the
 
 
 
-(major-mode-hydra-define emacs-lisp-mode  (:formatter my-hydra-formatter)
-  ("Eval"
-   (("b" eval-buffer "buffer")
-	("e" eval-defun "defun")
-	("r" eval-region "region"))
-   "REPL"
-   (("I" ielm "ielm"))
-   "Test"
-   (("t" ert "prompt")
-	("T" (ert t) "all")
-	("F" (ert :failed) "failed"))
-   "Doc"
-   (("f" describe-function "function")
-	("v" describe-variable "variable")
-	("i" info-lookup-symbol "info lookup"))))
+;; (major-mode-hydra-define emacs-lisp-mode  (:formatter my-hydra-formatter)
+;;   ("Eval"
+;;    (("b" eval-buffer "buffer")
+;; 	("e" eval-defun "defun")
+;; 	("r" eval-region "region"))
+;;    "REPL"
+;;    (("I" ielm "ielm"))
+;;    "Test"
+;;    (("t" ert "prompt")
+;; 	("T" (ert t) "all")
+;; 	("F" (ert :failed) "failed"))
+;;    "Doc"
+;;    (("f" describe-function "function")
+;; 	("v" describe-variable "variable")
+;; 	("i" info-lookup-symbol "info lookup"))))
 
 
 (use-package web-mode
@@ -1951,7 +1953,10 @@ Find Stuff
   ("g" ((lambda() (interactive) (ezfzf-git-grep))) "git grep")
   )
 
-(recentf-mode 1)
+(run-with-idle-timer
+ 2
+ nil
+ `(lambda() (recentf-mode 1)))
 
 (global-set-key (kbd "C-c f") 'hydra-find/body)
 
