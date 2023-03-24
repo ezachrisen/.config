@@ -391,7 +391,12 @@ move to the next field. Call `open-line' if nothing else applies."
 ;; (global-set-key (kbd "C-o") 'open-previous-line)
 (global-set-key (kbd "M-o") 'open-next-line)
 (global-set-key (kbd "C-o") 'aya-open-line) 
+(global-set-key (kbd "C-c C-m") 'execute-extended-command)
+(global-set-key (kbd "C-x C-m") 'execute-extended-command)
+(global-set-key (kbd "C-x C-a") 'beginning-of-buffer)
+(global-set-key (kbd "C-x C-e") 'end-of-buffer)
 
+(global-set-key (kbd "C-w") 'backward-kill-word)
 
 ;; required to make the meta-arrow keys work in some terminals
 (define-key input-decode-map "\e\eOA" [(meta up)])
@@ -1307,7 +1312,7 @@ ARG is the full path to the directory where you want to run the
 
 
   (pretty-hydra-define hydra-go-test
-	(:title "Go Test" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
+	(:title "Go Test" :separator " " :formatter my-hydra-formatter :idle 0.1 :color blue)
 	("Test"
 	 (("m" ((lambda()(go-test t))) "module")
 	 ("p" go-test "package")

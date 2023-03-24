@@ -17,6 +17,7 @@ require("settings")
 require("espen.go")
 
 
+vim.keymap.set('n', "<leader>i", "<cmd>e ~/.config/nvim/init.lua<CR><Cmd>cd %:p:h<CR>")
 vim.keymap.set('n', "<leader>tt", function() require("espen.go").ToggleQuickFix() end)
 vim.keymap.set('n', '<leader>tp', function() require("espen.go").TestPackage(vim.fn.expand('%:p:h')) end)
 vim.keymap.set('n', '<leader>o', function() require("espen.go").GoMenu() end)
