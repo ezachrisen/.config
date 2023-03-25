@@ -339,8 +339,9 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
 
 ;;; --------------------------------------------------------------------- EDITING
 
-(setq tab-width 2)
-(setq-default fill-column 90)			; Fill column; show with cheat sheet
+(setq-default 
+ tab-width 2
+ fill-column 90)			; Fill column; show with cheat sheet
 (delete-selection-mode 1)				; Type over selection to replace it
 (put 'downcase-region 'disabled nil)	; Allow downcase/upcase
 (put 'upcase-region 'disabled nil)
@@ -394,7 +395,7 @@ move to the next field. Call `open-line' if nothing else applies."
 (global-set-key (kbd "C-c C-m") 'execute-extended-command)
 (global-set-key (kbd "C-x C-m") 'execute-extended-command)
 (global-set-key (kbd "C-x C-a") 'beginning-of-buffer)
-(global-set-key (kbd "C-x C-e") 'end-of-buffer)
+;;(global-set-key (kbd "C-x C-e") 'end-of-buffer)
 
 (global-set-key (kbd "C-w") 'backward-kill-word)
 
@@ -450,6 +451,15 @@ there's a region, all lines that region covers will be duplicated."
 	(cons beg end)))
 
 (global-set-key (kbd "M-\"") 'duplicate-current-line-or-region)
+
+(defun my-copy-or-kill-region (arg)
+  "Copy or kill the region depending on the prefix arg."
+  (interactive "P")
+  (if arg
+      (kill-region (region-beginning) (region-end))
+    (kill-ring-save (region-beginning) (region-end))))
+
+(global-set-key (kbd "M-w") 'my-copy-or-kill-region)
 
 
 ;; Misc editing commands
@@ -629,6 +639,10 @@ Use in `isearch-mode-end-hook'."
 
 ;;; --------------------------------------------------------------------- LSP
 
+(use-package lsp-ui
+  :ensure t
+)
+
 (use-package lsp-mode
   :ensure t
   :defer t
@@ -662,13 +676,14 @@ Use in `isearch-mode-end-hook'."
 	(:title "LSP" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
 	("Info"
 	 (("d" lsp-describe-thing-at-point "describe thing" )
-	  ("r" lsp-find-references "find references")
+	  ("c" lsp-find-references "find references")
 	  ("t" lsp-find-type-definition "find type def")
 	  ("x" xref-find-definitions-other-window "def other window")
-	  ("t" lsp-treemacs-symbols "treemacs symbols")
+	  ("u" lsp-treemacs-symbols "treemacs symbols")
 	  ("g" lsp-ui-doc-glance "doc glance"))
 	 "Actions"
 	 (("a" lsp-execute-code-action "exec code action")
+	  ("r" lsp-rename "rename")
 	  ("s" lsp-toggle-symbol-highlight "symbol highlight"
 	   :toggle lsp-enable-symbol-highlighting :color red)
 	  ("i" lsp-ui-imenu "Imenu"))))
@@ -1335,15 +1350,17 @@ ARG is the full path to the directory where you want to run the
 
 (defun common-go-setup() 
   (hack-dir-local-variables-non-file-buffer)		 ; load .dir-locals.el
-
   (define-pkgsite-service go-package-site-dir)		 ; set dir for Go doc server
   (define-local-services)							 
   (if (not (string-match "go" compile-command))		 ; set default compile command
 	  (set (make-local-variable 'compile-command)
 		   "go build -v && go test -v -short && go vet"))
   (setq fill-column 90)
+;;  (setq indent-tabs-mode nil) 
   (setq tab-width 2)
+  ;;(setq indent-line-function 'insert-tab)
   (setq gofmt-command "goimports")
+  (setq go-ts-mode-indent-offset 2)
   (company-mode)
   (electric-pair-mode)
   (lsp)
