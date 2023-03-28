@@ -1977,6 +1977,7 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 ;; End:
 
 (use-package fzf
+  :ensure t
   :bind
   ;; Don't forget to set keybinds!
   :config

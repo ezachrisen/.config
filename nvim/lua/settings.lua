@@ -37,7 +37,7 @@ vim.g.incsearch = true
 vim.wo.relativenumber = true
 --vim.opt.autochdir = true
 vim.cmd("set signcolumn=yes:2")
-
+vim.ftNix = false;
 -- if vim.fn.has("termguicolors") == 1 then
 vim.o.termguicolors = true
 
