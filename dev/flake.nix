@@ -23,7 +23,7 @@
           overlays = [
 		        (import (builtins.fetchTarball {
 		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-              sha256 ="10cm60581b7ma5r4451vdbyrs5rvwg44fd5qbjli0swqhgzzg8h0";
+			  sha256 = "0ydzggbrgcbidg7ivnxgmg8p8jgd3d5jx8lbywggndqbzk59ms4i";
 		        }))
 		      ];
         };
@@ -58,36 +58,35 @@
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
-	            pkgs.emacsGit
+              pkgs.emacsGit
               unstablepkgs.go_1_20
-	      unstablepkgs.neovim
+              unstablepkgs.neovim
               unstablepkgs.gopls
               unstablepkgs.buf
               unstablepkgs.protoc-gen-go
               unstablepkgs.protoc-gen-go-grpc
-	      unstablepkgs.fzf
+              unstablepkgs.fzf
               unstablepkgs.protoc-gen-grpc-web
               pkgs.pandoc
               pkgs.ripgrep
-	      pkgs.docker
-	      pkgs.bat
-              #pkgs.cmake
-              #pkgs.clang
-              #pkgs.ninja
-              #pkgs.pkg-config
-	     #pkgs.mesa
+              pkgs.docker
+              pkgs.bat
+              pkgs.cmake
+              pkgs.clang
+              pkgs.ninja
+              pkgs.pkg-config
               pkgs.ispell
               pkgs.nodejs-19_x
               pkgs.xdg-utils
               pkgs.nodePackages.typescript
               pkgs.nodePackages.npm
-	      unstablepkgs.protobuf3_19
+              unstablepkgs.protobuf3_19
               unstablepkgs.golangci-lint
               unstablepkgs.protoc-gen-validate
               unstablepkgs.gotools
               unstablepkgs.protoc-gen-grpc-web
               devtools.staticcheck
-	      devtools.pkgsite
+              devtools.pkgsite
             ];
 
             shellHook = ''
@@ -111,9 +110,8 @@
               RED="$(tput setaf 1)"
               RESET="$(tput sgr0)"
               PS1='\[\033[01;32m\]\h\[\033[00m\] \W$(__git_ps1 " ''${RED}(%s)''${RESET}") $ '
+              alias vi='nvim'
             '';
-
-            MY_NAME = "cow";
           };
         }
     );

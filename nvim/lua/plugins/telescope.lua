@@ -1,9 +1,9 @@
 return {
 
-  {
-    'nvim-telescope/telescope-fzf-native.nvim',
-    build = 'make',
-  },
+  -- {
+  --   'nvim-telescope/telescope-fzf-native.nvim',
+  --   build = 'make',
+  -- },
 
   {
     -- SEARCH
@@ -32,8 +32,8 @@ return {
           layout_config = { height = 0.75, preview_height = 0.7 },
           mappings = {
             i = {
-                  ["<esc>"] = actions.close,
-                  ["<C-o>"] = actions.send_selected_to_qflist
+              ["<esc>"] = actions.close,
+              ["<C-o>"] = actions.send_selected_to_qflist
             }
           },
           scroll_strategy = "limit"
