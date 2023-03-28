@@ -27,6 +27,8 @@
 (add-to-list 'load-path "~/.config/emacs/lisp")
 
 
+(defvar language-server "lsp")
+
 ;; ---------------------------------------------------------------------- STARTUP
 
 (setq
@@ -249,7 +251,7 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
 	(when (>= idx (length margins))
 	  (setq idx 0))
 	(if arg (dolist (w (window-list))
-			  (when (not (string-match-p (regexp-quote "*") (buffer-name (window-buffer w))))
+			  (when (not (string-match-p (regexp-quotex "*") (buffer-name (window-buffer w))))
 				(set-window-margins w
 									(car (nth idx margins)) (cdr (nth idx margins)))))
 	  (set-window-margins (get-buffer-window)
@@ -257,6 +259,7 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
 
 ;;; --------------------------------------------------------------------- LINE NUMBERS
 
+(setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
 (global-set-key (kbd "C-c l") 'cycle-line-numbers)
 
@@ -293,7 +296,7 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
 (global-set-key (kbd "C-c *") 'occur-word)		 ; Word at point in buffer
 (global-set-key (kbd "M-f")   'forward-to-word)	 ; Go to beginning of word
 (global-set-key (kbd "M-b")   'backward-to-word) ; Go back to beginning of word
-(global-set-key (kbd "C-c r l") 'list-registers)
+;(global-set-key (kbd "C-c r l") 'list-registers)
 (setq set-mark-command-repeat-pop t)             ; C-u C-SPC C-SPC cycles positions
 (setq global-mark-ring-max 16)                   ; Max positions in global mark ring
 (save-place-mode 1)                              ; Return to last position on file open
@@ -523,17 +526,20 @@ there's a region, all lines that region covers will be duplicated."
 
 ;;; --------------------------------------------------------------------- COMMENTS
 
-(defun comment-or-uncomment-line-or-region ()
-  "Comments or uncomments the current line or region."
-  (interactive)
-  (if (region-active-p)
-	  (comment-or-uncomment-region (region-beginning) (region-end))
-	(comment-or-uncomment-region (line-beginning-position) (line-end-position))
-	)
-  )
+(defun comment-or-uncomment-line-or-region (arg)
+  "Comments or uncomments the current line or region. 
+With ARG, toggles the comment on that many lines."
+  (interactive "P")
+  (if arg
+	  (comment-line arg)
+	(if (region-active-p)
+		(comment-or-uncomment-region (region-beginning) (region-end))
+	  (comment-or-uncomment-region (line-beginning-position) (line-end-position)))))
 
 
 (global-set-key (kbd "M-;") 'comment-or-uncomment-line-or-region)
+(global-set-key (kbd "C-x ;") 'comment-line) ; the default binding, C-x C-; doesn't work in terminal
+
 
 
 ;;; --------------------------------------------------------------------- SEARCHING
@@ -639,21 +645,24 @@ Use in `isearch-mode-end-hook'."
 
 ;;; --------------------------------------------------------------------- LSP
 
+(when (string= language-server "lsp") 
+
 (use-package lsp-ui
   :ensure t
-)
+  :config 
+  (setq lsp-ui-doc-enable nil
+		lsp-ui-doc-show-with-cursor nil))
 
 (use-package lsp-mode
   :ensure t
   :defer t
   :ensure-system-package (gopls . "go install golang.org/x/tools/gopls@latest")
   :commands (lsp lsp-deferred)
-  :bind (("C-h r"	. 'lsp-find-references)
-		 ("C-h i"	. 'lsp-find-definition)
-		 ("C-c d"	. 'hydra-lsp/body)
+  :bind (("C-c x"	. 'lsp-find-references)
+		 ("C-c d"	. 'lsp-describe-thing-at-point)
 		 ("C-c i"   . 'lsp-ui-imenu)
-		 ("M-'"		. 'xref-find-definitions-other-window)
-		 ("C-c x"	. 'lsp-execute-code-action))
+		 ("C-c r"   . 'lsp-rename)		 
+		 ("M-'"		. 'xref-find-definitions-other-window))
   :config
   (setq lsp-enable-symbol-highlighting t		; highlight references of symbol at point
 		lsp-lens-enable nil
@@ -672,27 +681,39 @@ Use in `isearch-mode-end-hook'."
 										; If this is not set, gopls will not work properly in test files with build tags.
 		lsp-go-env '((GOFLAGS . "-tags=integration,spanner")))
   ;; Hydra for common LSP tasks. See key binding under use-package lsp-mode.
-  (pretty-hydra-define hydra-lsp
-	(:title "LSP" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
-	("Info"
-	 (("d" lsp-describe-thing-at-point "describe thing" )
-	  ("c" lsp-find-references "find references")
-	  ("t" lsp-find-type-definition "find type def")
-	  ("x" xref-find-definitions-other-window "def other window")
-	  ("u" lsp-treemacs-symbols "treemacs symbols")
-	  ("g" lsp-ui-doc-glance "doc glance"))
-	 "Actions"
-	 (("a" lsp-execute-code-action "exec code action")
-	  ("r" lsp-rename "rename")
-	  ("s" lsp-toggle-symbol-highlight "symbol highlight"
-	   :toggle lsp-enable-symbol-highlighting :color red)
-	  ("i" lsp-ui-imenu "Imenu"))))
+  ;; (pretty-hydra-define hydra-lsp
+  ;; 	(:title "LSP" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
+  ;; 	("Info"
+  ;; 	 (("d" lsp-describe-thing-at-point "describe thing" )
+  ;; 	  ("c" lsp-find-references "find references")
+  ;; 	  ("t" lsp-find-type-definition "find type def")
+  ;; 	  ("x" xref-find-definitions-other-window "def other window")
+  ;; 	  ("u" lsp-treemacs-symbols "treemacs symbols")
+  ;; 	  ("g" lsp-ui-doc-glance "doc glance"))
+  ;; 	 "Actions"
+  ;; 	 (("a" lsp-execute-code-action "exec code action")
+  ;; 	  ("r" lsp-rename "rename")
+  ;; 	  ("s" lsp-toggle-symbol-highlight "symbol highlight"
+  ;; 	   :toggle lsp-enable-symbol-highlighting :color red)
+  ;; 	  ("i" lsp-ui-imenu "Imenu"))))
 
   :hook ((web . lsp)))
 
+)
 
 
 
+
+;;; --------------------------------------------------------------------- EGLOT
+
+(when (string= language-server "eglot")
+
+(setq eldoc-echo-area-use-multiline-p 1)
+(setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
+
+
+
+)
 
 
 ;;; --------------------------------------------------------------------- SNIPPETS
@@ -707,7 +728,7 @@ Use in `isearch-mode-end-hook'."
 		 ("C-c y l" . 'yas-describe-tables))
   :config
   (yas-global-mode 1)
-  :hook (go-mode . yas-minor-mode))
+  :hook (go-ts-mode . yas-minor-mode))
 
 
 
@@ -1347,9 +1368,11 @@ ARG is the full path to the directory where you want to run the
 (global-set-key (kbd "C-c t") 'hydra-go-test/body)
 
 (require 'gofmt)
-
+(not go-package-site-dir)
 (defun common-go-setup() 
   (hack-dir-local-variables-non-file-buffer)		 ; load .dir-locals.el
+  (when (not go-package-site-dir)
+	(setq go-package-site-dir (projectile-project-root)))
   (define-pkgsite-service go-package-site-dir)		 ; set dir for Go doc server
   (define-local-services)							 
   (if (not (string-match "go" compile-command))		 ; set default compile command
@@ -1361,9 +1384,16 @@ ARG is the full path to the directory where you want to run the
   ;;(setq indent-line-function 'insert-tab)
   (setq gofmt-command "goimports")
   (setq go-ts-mode-indent-offset 2)
+  (subword-mode 1)
   (company-mode)
   (electric-pair-mode)
-  (lsp)
+  (cond 
+   ((string= language-server "lsp")
+	(message "activating lsp in go mode")
+	(lsp-deferred))
+   ((string= language-server "eglot")
+	(message "activating eglot in go mode")
+	(eglot-ensure)))
   (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local))
 ;  (add-hook 'after-save-hook 'go-test nil 'make-it-local))
 
@@ -1973,6 +2003,7 @@ Find Stuff
   ("b" ((lambda() (interactive) (fzf-switch-buffer))) "buffer")
   ("r" ((lambda() (interactive) (fzf-recentf t))) "recent")
   ("g" ((lambda() (interactive) (ezfzf-git-grep))) "git grep")
+  ("*" ((lambda() (interactive) (ezfzf-git-grep-word))) "git grep *")
   )
 
 (run-with-idle-timer
@@ -1985,6 +2016,22 @@ Find Stuff
 
 
 
+(defun ezfzf-git-grep-word ()
+  (interactive)
+  (let ((fzf--target-validator (fzf--use-validator
+                                (function fzf--pass-through)))
+        (fzf--extractor-list (fzf--use-extractor
+                              (list fzf--file-lnum-regexp 1 2))))
+    (fzf-with-command 
+	 (format (concat "git grep " fzf/git-grep-args) (shell-quote-argument "")) ; COMMAND
+     #'fzf--action-find-file-with-line  ; ACTION
+     (locate-dominating-file default-directory ".git") ; DIRECTORY
+	 t ; AS_FILTER
+	 (thing-at-point 'word 'no-properties) ; INITQ
+	 nil ; FILE-PATTERN
+	 )))
+
+
 (defun ezfzf-git-grep ()
   (interactive)
   (let ((fzf--target-validator (fzf--use-validator
@@ -1994,6 +2041,8 @@ Find Stuff
     (fzf-with-command (format (concat "git grep " fzf/git-grep-args) (shell-quote-argument ""))
                       #'fzf--action-find-file-with-line
                       (locate-dominating-file default-directory ".git"))))
+
+
 ;;; init.el ends here
 
 (custom-set-faces
@@ -2125,7 +2174,8 @@ Find Stuff
 								(if (eq ml-selected-window (selected-window))	
 									'(:foreground "#FE8019" :background "#46403D" :weight bold )					
 								'(:foreground "#9D8E7A" :background "#46403D"))))
-			 (:eval (propertize  (ez/git-branch) 'face 
+			 (:eval (propertize  (ez/git-branch)
+								 'face
 								 '(:foreground "#E7D6AC" :background "#46403D"))) 
 			 (:eval (propertize "  " 'face 
 								'(:foreground "#46403D" :background "#343130")))
@@ -2155,21 +2205,26 @@ Find Stuff
 
  			 ))))))
 
-
 (defun ez/git-branch()
+  "Return a string with the git branch of the current buffer."
   (if (fboundp 'vc-git--symbolic-ref)
-	  (let ((branch (format "%s " (vc-git--symbolic-ref (buffer-file-name)))))
-		(if (and branch (string= branch ""))
-			(concat "    ")
-		  (concat "  " branch "  ")))
-	(concat "    ")))
-
+	  ;; need this if statement because vc-git--symbolic-ref will be bound
+	  ;; if ANY buffer is under vc; but if the current buffer isn't it will 
+	  ;; return nil in the let, causing an error
+	  (if (and (buffer-file-name) (vc-git--symbolic-ref (buffer-file-name)))
+		  (let ((branch (vc-git--symbolic-ref (buffer-file-name))))
+			(if (stringp branch)
+				(concat "  " branch "  ")
+			  "Nope"))
+		"   ")
+	"    "))
+ 
 
 (defun ez/change-indicator()
   "A graphical representation of whether the buffer is modified or not."
   (if (buffer-modified-p)
-	  (concat "  ")
-	(concat "  ")))
+	  (concat "    ")
+	(concat "    ")))
 
 (defun ez/mode-name()
   "How to display the major mode name in the mode line."
