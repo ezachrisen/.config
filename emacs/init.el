@@ -1827,6 +1827,7 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 
 
 (message "end of init.el")
-
+(use-package go-fill-struct 
+  :ensure t)
 ;;; init.el ends here
 
