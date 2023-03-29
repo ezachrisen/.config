@@ -24,7 +24,10 @@
 ;; Minimize garbage collection during startup
 (setq gc-cons-threshold most-positive-fixnum)
 
+(add-to-list 'load-path "~/.config/emacs/lisp")
 
+
+(defvar language-server "lsp")
 
 ;; ---------------------------------------------------------------------- STARTUP
 
@@ -82,7 +85,7 @@
 
 ;;; --------------------------------------------------------------------- PACKAGE MANAGEMENT
 
-; use-package bootstrap; installs use-package if not already installed
+										; use-package bootstrap; installs use-package if not already installed
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/")) ;
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
@@ -94,7 +97,7 @@
   (package-install 'use-package))
 
 
-; (setq use-package-verbose t) ; message when each package is loaded
+										; (setq use-package-verbose t) ; message when each package is loaded
 
 ;; Install apps into the OS in a use-package declaration with the
 ;; :ensure-system-package keyword.
@@ -148,7 +151,7 @@
 
 (defadvice load-theme (before theme-dont-propagate activate)
   "Reset the current when switching; prevents carry-over."
- (mapc #'disable-theme custom-enabled-themes))
+  (mapc #'disable-theme custom-enabled-themes))
 
 (use-package gruvbox-theme
   :ensure t
@@ -161,7 +164,11 @@
 (use-package leuven-theme
   :ensure t
   :defer t
-)
+  )
+
+(use-package material-theme
+  :ensure t
+  :defer t)
 
 (use-package borland-blue-theme
   :ensure t
@@ -171,36 +178,47 @@
 (defun custom-theme-colors(theme &rest args)
   "Modifications to THEME, activate if ARGS is true."
   (if args
-  (cond ((string= theme "gruvbox-dark-soft")
-		 (custom-theme-set-faces
-		  'gruvbox-dark-soft
-		  `(underline ((t (:underline nil))))
-		  `(line-number ((t (:background unspecified :foreground "#7c6f64"))))
-		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
-		  `(isearch-lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
-		((string= theme "gruvbox-dark-medium")
-		 'gruvbox-dark-medium
-		 (custom-theme-set-faces
-		  'gruvbox-dark-medium
-		  `(underline ((t (:underline nil))))
-		  `(line-number ((t (:background unspecified :foreground "#7c6f64"))))
-		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
-		  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
-		((string= theme "leuven")
-		 'leuven
-		 (custom-theme-set-faces
-		  'leuven
-		  `(underline ((t (:underline nil))))
-		  `(vertical-border ((t (:background "#ffffff" :foreground "gray80"))))
-		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
-		  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
-		((string= theme "nord")
-		 (custom-theme-set-faces
-		  'nord
-		  `(underline ((t (:underline nil))))
-		  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
-		  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))
-		  `(line-number ((t (:background unspecified :foreground "#4C566A")))))))))
+	  (cond ((string= theme "gruvbox-dark-soft")
+			 (custom-theme-set-faces
+			  'gruvbox-dark-soft
+			  `(underline ((t (:underline nil))))
+			  `(line-number ((t (:background unspecified :foreground "#7c6f64"))))
+			  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
+			  `(isearch-lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))
+			  `(mode-line ((t (:background "#343130"))))))
+
+			((string= theme "gruvbox-dark-medium")
+			 'gruvbox-dark-medium
+			 (custom-theme-set-faces
+			  'gruvbox-dark-medium
+			  `(underline ((t (:underline nil))))
+			  `(line-number ((t (:background unspecified :foreground "#7c6f64"))))
+			  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
+			  `(mode-line ((t (:background "#343130"))))
+			  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
+			((string= theme "material-light")
+			 'material-light
+			 (custom-theme-set-faces
+			  'material-light
+			  `(underline ((t (:underline nil))))
+			  `(vertical-border ((t (:background "#FAFAFA" :foreground "gray80"))))
+			  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
+			  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
+			((string= theme "leuven")
+			 'leuven
+			 (custom-theme-set-faces
+			  'leuven
+			  `(underline ((t (:underline nil))))
+			  `(vertical-border ((t (:background "#FFFFFF" :foreground "gray80"))))
+			  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
+			  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))))
+			((string= theme "nord")
+			 (custom-theme-set-faces
+			  'nord
+			  `(underline ((t (:underline nil))))
+			  `(isearch ((t (:background "#fabd2f" :foreground "#000000"))))
+			  `(lazy-highlight ((t (:background "#66999D" :foreground "#ffffff"))))
+			  `(line-number ((t (:background unspecified :foreground "#4C566A")))))))))
 
 
 (advice-add 'load-theme :after #'custom-theme-colors)
@@ -209,7 +227,7 @@
 
 
 
-; GUI appearance
+										; GUI appearance
 (if window-system
 	(progn
 	  (setq-default cursor-type '(bar . 1))
@@ -225,27 +243,49 @@
 ;; Define a list of left/right margin pairs and cycle through them.
 (let ((margins '((0 . 0) (1 . 0) (5 . 0) (20 . 20) (30 . 30) (50 . 50)))
 	  (idx 0))
-	  (defun wide-margins(&optional arg)
-		"Cycle through sets of margin widths of the current buffer for a more pleasant look.
+  (defun wide-margins(&optional arg)
+	"Cycle through sets of margin widths of the current buffer for a more pleasant look.
 With prefix ARG, apply to all windows, except special ones that contain the '*' character."
-		(interactive "P")
-		(setq idx (1+ idx))
-		(when (>= idx (length margins))
-		  (setq idx 0))
-		(if arg (dolist (w (window-list))
-				  (when (not (string-match-p (regexp-quote "*") (buffer-name (window-buffer w))))
-					(set-window-margins w
-										(car (nth idx margins)) (cdr (nth idx margins)))))
-		  (set-window-margins (get-buffer-window)
-							  (car (nth idx margins)) (cdr (nth idx margins))))))
-
+	(interactive "P")
+	(setq idx (1+ idx))
+	(when (>= idx (length margins))
+	  (setq idx 0))
+	(if arg (dolist (w (window-list))
+			  (when (not (string-match-p (regexp-quotex "*") (buffer-name (window-buffer w))))
+				(set-window-margins w
+									(car (nth idx margins)) (cdr (nth idx margins)))))
+	  (set-window-margins (get-buffer-window)
+						  (car (nth idx margins)) (cdr (nth idx margins))))))
 
 ;;; --------------------------------------------------------------------- LINE NUMBERS
 
+(setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
-(global-set-key (kbd "C-c l") 'display-line-numbers-mode)
+(global-set-key (kbd "C-c l") 'cycle-line-numbers)
 
+(defun cycle-line-numbers()
+  "Cycle through no line numbers, absolute line numbers and relative line numbers."
+  (interactive)
+  (cond
+   ((equal display-line-numbers t)
+	(setq display-line-numbers 'relative))
+   ((equal display-line-numbers 'relative)
+	(setq display-line-numbers nil))
+   ((equal display-line-numbers nil)
+	(setq display-line-numbers t))))
 
+;; (defun cycle-line-numbers()
+;;   "Cycle through no line numbers, absolute line numbers and relative line numbers."
+;;   (interactive)
+;;   (cond 
+;;    ((equal display-line-numbers t)
+;; 	(setq display-line-numbers 'relative))
+;;    ((equal display-line-numbers 'relative)
+;; 	(setq display-line-numbers nil))
+;;    ((equal display-line-numbers nil)
+;; 	(setq display-line-numbers t))))
+   
+  
 
 
 
@@ -256,7 +296,7 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
 (global-set-key (kbd "C-c *") 'occur-word)		 ; Word at point in buffer
 (global-set-key (kbd "M-f")   'forward-to-word)	 ; Go to beginning of word
 (global-set-key (kbd "M-b")   'backward-to-word) ; Go back to beginning of word
-(global-set-key (kbd "C-c r l") 'list-registers)
+;(global-set-key (kbd "C-c r l") 'list-registers)
 (setq set-mark-command-repeat-pop t)             ; C-u C-SPC C-SPC cycles positions
 (setq global-mark-ring-max 16)                   ; Max positions in global mark ring
 (save-place-mode 1)                              ; Return to last position on file open
@@ -295,21 +335,23 @@ With prefix ARG, apply to all windows, except special ones that contain the '*' 
   (setq beacon-blink-when-point-moves-vertically nil)
   (setq beacon-blink-when-window-scrolls nil)
   :bind
-  ("M-c" . beacon-blink))
+  ("M-SPC" . beacon-blink))
 
 
 
 
 ;;; --------------------------------------------------------------------- EDITING
 
-(setq tab-width 2)
-(setq-default fill-column 90)			; Fill column; show with cheat sheet
+(setq-default 
+ tab-width 2
+ fill-column 90)			; Fill column; show with cheat sheet
 (delete-selection-mode 1)				; Type over selection to replace it
 (put 'downcase-region 'disabled nil)	; Allow downcase/upcase
 (put 'upcase-region 'disabled nil)
 
 (defvar newline-and-indent t
   "Modify the behavior of the open-*-line functions to  to autoindent.")
+
 
 (defun open-next-line (arg)
   "Move to the next line and then opens a line.
@@ -331,10 +373,34 @@ See also `newline-and-indent'."
   (when newline-and-indent
 	(indent-according-to-mode)))
 
-(global-set-key (kbd "C-o") 'open-previous-line)
+
+
+(defun aya-open-line ()
+  "Call `open-line', unless there are abbrevs or snippets at point.
+In that case expand them.  If there's a snippet expansion in progress,
+move to the next field. Call `open-line' if nothing else applies."
+  (interactive)
+  (cond ((expand-abbrev))
+
+        ((and (fboundp 'yas-active-snippets) (yas-active-snippets))
+         (yas-next-field-or-maybe-expand))
+
+        ((ignore-errors
+           (yas-expand)))
+
+        (t
+         (open-previous-line 1))))
+
+
+;; (global-set-key (kbd "C-o") 'open-previous-line)
 (global-set-key (kbd "M-o") 'open-next-line)
+(global-set-key (kbd "C-o") 'aya-open-line) 
+(global-set-key (kbd "C-c C-m") 'execute-extended-command)
+(global-set-key (kbd "C-x C-m") 'execute-extended-command)
+(global-set-key (kbd "C-x C-a") 'beginning-of-buffer)
+;;(global-set-key (kbd "C-x C-e") 'end-of-buffer)
 
-
+(global-set-key (kbd "C-w") 'backward-kill-word)
 
 ;; required to make the meta-arrow keys work in some terminals
 (define-key input-decode-map "\e\eOA" [(meta up)])
@@ -352,12 +418,12 @@ See also `newline-and-indent'."
 
 
 (defun copy-whole-line (arg)
-	  "Copy lines (as many as prefix ARG) in the kill ring.
+  "Copy lines (as many as prefix ARG) in the kill ring.
 Works in read-only buffers."
-	  (interactive "p")
-	  (kill-ring-save (line-beginning-position)
-					  (line-beginning-position (+ 1 arg)))
-	  (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
+  (interactive "p")
+  (kill-ring-save (line-beginning-position)
+				  (line-beginning-position (+ 1 arg)))
+  (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
 
 
 
@@ -388,6 +454,15 @@ there's a region, all lines that region covers will be duplicated."
 	(cons beg end)))
 
 (global-set-key (kbd "M-\"") 'duplicate-current-line-or-region)
+
+(defun my-copy-or-kill-region (arg)
+  "Copy or kill the region depending on the prefix arg."
+  (interactive "P")
+  (if arg
+      (kill-region (region-beginning) (region-end))
+    (kill-ring-save (region-beginning) (region-end))))
+
+(global-set-key (kbd "M-w") 'my-copy-or-kill-region)
 
 
 ;; Misc editing commands
@@ -451,31 +526,34 @@ there's a region, all lines that region covers will be duplicated."
 
 ;;; --------------------------------------------------------------------- COMMENTS
 
-(defun comment-or-uncomment-line-or-region ()
-  "Comments or uncomments the current line or region."
-  (interactive)
-  (if (region-active-p)
-	  (comment-or-uncomment-region (region-beginning) (region-end))
-	(comment-or-uncomment-region (line-beginning-position) (line-end-position))
-	)
-  )
+(defun comment-or-uncomment-line-or-region (arg)
+  "Comments or uncomments the current line or region. 
+With ARG, toggles the comment on that many lines."
+  (interactive "P")
+  (if arg
+	  (comment-line arg)
+	(if (region-active-p)
+		(comment-or-uncomment-region (region-beginning) (region-end))
+	  (comment-or-uncomment-region (line-beginning-position) (line-end-position)))))
 
 
 (global-set-key (kbd "M-;") 'comment-or-uncomment-line-or-region)
+(global-set-key (kbd "C-x ;") 'comment-line) ; the default binding, C-x C-; doesn't work in terminal
+
 
 
 ;;; --------------------------------------------------------------------- SEARCHING
 
-; Search and Replace
+										; Search and Replace
 (setq case-fold-search t)             ; Case-insensitive searches
 (setq query-replace-highlight t)      ; Highlight matches during replacement
 
-; In incremental search, run occur with the last search string
+										; In incremental search, run occur with the last search string
 (define-key isearch-mode-map (kbd "C-o") 'isearch-occur)
 
-; At then end of C-s, leave point at the beginning of the match, not the end
-; When searching for "begins with...", we usually want to be at the beginning of
-; the word, not at the end of it.
+										; At then end of C-s, leave point at the beginning of the match, not the end
+										; When searching for "begins with...", we usually want to be at the beginning of
+										; the word, not at the end of it.
 (add-hook 'isearch-mode-end-hook
 		  #'endless/goto-match-beginning)
 
@@ -498,12 +576,12 @@ Use in `isearch-mode-end-hook'."
 (use-package hydra
   :ensure t)
 
-;; Enable a single key binding to call up mode-specific Hydra.
+;; ;; Enable a single key binding to call up mode-specific Hydra.
 (use-package major-mode-hydra
   :ensure t
   :demand t
-  :bind
-  ("C-c c" . major-mode-hydra)
+  ;; :bind
+  ;; ("C-c c" . major-mode-hydra)
   :config
   (setq major-mode-hydra-separator "-")
   (setq major-mode-hydra-invisible-quit-key "q"))
@@ -567,54 +645,75 @@ Use in `isearch-mode-end-hook'."
 
 ;;; --------------------------------------------------------------------- LSP
 
+(when (string= language-server "lsp") 
+
+(use-package lsp-ui
+  :ensure t
+  :config 
+  (setq lsp-ui-doc-enable nil
+		lsp-ui-doc-show-with-cursor nil))
+
 (use-package lsp-mode
   :ensure t
   :defer t
   :ensure-system-package (gopls . "go install golang.org/x/tools/gopls@latest")
   :commands (lsp lsp-deferred)
-  :bind (("C-h r"	. 'lsp-find-references)
-		 ("C-h i"	. 'lsp-find-definition)
-		 ("C-c d"	. 'hydra-lsp/body)
+  :bind (("C-c x"	. 'lsp-find-references)
+		 ("C-c d"	. 'lsp-describe-thing-at-point)
 		 ("C-c i"   . 'lsp-ui-imenu)
-		 ("M-'"		. 'xref-find-definitions-other-window)
-		 ("C-c x"	. 'lsp-execute-code-action))
+		 ("C-c r"   . 'lsp-rename)		 
+		 ("M-'"		. 'xref-find-definitions-other-window))
   :config
   (setq lsp-enable-symbol-highlighting t		; highlight references of symbol at point
-												; lsp-completion-provider :none
+		lsp-lens-enable nil
+										; lsp-completion-provider :none
 		lsp-enable-links nil					; turn off links; they're ugly
 		lsp-file-watch-threshold 5000			; max files to watch before warning
-												; lsp-ui-doc-enable nil
-												; lsp-diagnostic-package :auto
+										; lsp-ui-doc-enable nil
+										; lsp-diagnostic-package :auto
 		eldoc-echo-area-use-multiline-p nil		; don't allow resizing echo area
 		lsp-eldoc-render-all nil				; only show symbol info in echo area
-		lsp-headerline-breadcrumb-enable t		; show file / func at top of screen
+										; lsp-headerline-breadcrumb-enable t		; show file / func at top of screen
 		read-process-output-max (* 1024 1024)	; read large input from lsp provider
 		lsp-log-io nil							; turn off lsp logging
 
-		; Special setting for gopls: set the GOFLAGS environment variable.
-		; If this is not set, gopls will not work properly in test files with build tags.
+										; Special setting for gopls: set the GOFLAGS environment variable.
+										; If this is not set, gopls will not work properly in test files with build tags.
 		lsp-go-env '((GOFLAGS . "-tags=integration,spanner")))
-;; Hydra for common LSP tasks. See key binding under use-package lsp-mode.
-(pretty-hydra-define hydra-lsp
-  (:title "LSP" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
-  ("Info"
-   (("d" lsp-describe-thing-at-point "describe thing" )
-	("r" lsp-find-references "find references")
-	("t" lsp-find-type-definition "find type def")
-	("x" xref-find-definitions-other-window "def other window")
-	("t" lsp-treemacs-symbols "treemacs symbols")
-	("g" lsp-ui-doc-glance "doc glance"))
-   "Actions"
-   (("a" lsp-execute-code-action "exec code action")
-	("s" lsp-toggle-symbol-highlight "symbol highlight"
-	 :toggle lsp-enable-symbol-highlighting :color red)
-	("i" lsp-ui-imenu "Imenu"))))
+  ;; Hydra for common LSP tasks. See key binding under use-package lsp-mode.
+  ;; (pretty-hydra-define hydra-lsp
+  ;; 	(:title "LSP" :separator " " :formatter my-hydra-formatter :idle 0.5 :color blue)
+  ;; 	("Info"
+  ;; 	 (("d" lsp-describe-thing-at-point "describe thing" )
+  ;; 	  ("c" lsp-find-references "find references")
+  ;; 	  ("t" lsp-find-type-definition "find type def")
+  ;; 	  ("x" xref-find-definitions-other-window "def other window")
+  ;; 	  ("u" lsp-treemacs-symbols "treemacs symbols")
+  ;; 	  ("g" lsp-ui-doc-glance "doc glance"))
+  ;; 	 "Actions"
+  ;; 	 (("a" lsp-execute-code-action "exec code action")
+  ;; 	  ("r" lsp-rename "rename")
+  ;; 	  ("s" lsp-toggle-symbol-highlight "symbol highlight"
+  ;; 	   :toggle lsp-enable-symbol-highlighting :color red)
+  ;; 	  ("i" lsp-ui-imenu "Imenu"))))
 
   :hook ((web . lsp)))
 
+)
 
 
 
+
+;;; --------------------------------------------------------------------- EGLOT
+
+(when (string= language-server "eglot")
+
+(setq eldoc-echo-area-use-multiline-p 1)
+(setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
+
+
+
+)
 
 
 ;;; --------------------------------------------------------------------- SNIPPETS
@@ -629,7 +728,7 @@ Use in `isearch-mode-end-hook'."
 		 ("C-c y l" . 'yas-describe-tables))
   :config
   (yas-global-mode 1)
-  :hook (go-mode . yas-minor-mode))
+  :hook (go-ts-mode . yas-minor-mode))
 
 
 
@@ -676,8 +775,9 @@ Use in `isearch-mode-end-hook'."
   (setq  projectile-indexing-method 'hybrid)
   :bind (("C-c p s" . 'helm-projectile-switch-project)
 		 ("C-c m" . 'projectile-compile-project)
-		 ("C-c C-f" . 'helm-projectile)
-		 ("C-c f" . 'helm-projectile)))
+		 ("C-c C-f" . 'helm-projectile)))
+
+										;		 ("C-c f" . 'helm-projectile)))
 
 
 ;; Provides grepping files within a project.
@@ -715,9 +815,9 @@ Use in `isearch-mode-end-hook'."
 ;; Navigate symbols identified by LSP with Helm. 
 ;; Currently not bound to anything, but may be useful.
 (use-package helm-lsp
-   :ensure t
-   :defer t
-   :commands helm-lsp-workspace-symbol)
+  :ensure t
+  :defer t
+  :commands helm-lsp-workspace-symbol)
 
 
 
@@ -823,11 +923,13 @@ Represents a preview of what a pull request diff will look like."
 		treemacs-deferred-git-apply-delay      0.5
 		treemacs-directory-name-transformer    #'identity
 		treemacs-display-in-side-window        nil)
+  (treemacs-fringe-indicator-mode 'always)
+  (treemacs-filewatch-mode t)
   (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)
   :bind (:map global-map
-			  ("C-x x" . treemacs-add-and-display-current-project)
-			  ("C-x n n" . treemacs-select-window)
-			  ("C-x C-n" . treemacs)))
+			  ;; ("C-x x" . treemacs-add-and-display-current-project)
+			  ("C-x x" . treemacs-select-window)
+			  ("C-x t" . treemacs)))
 
 (use-package treemacs-projectile
   :ensure t
@@ -841,8 +943,15 @@ Represents a preview of what a pull request diff will look like."
 
 (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
 
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
 
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
 
+;; #799B8E
 
 ;;; --------------------------------------------------------------------- COMPILATION
 
@@ -853,7 +962,8 @@ Represents a preview of what a pull request diff will look like."
 
 
 (global-set-key (kbd "C-c C-c") 'compile)
-(global-set-key (kbd "C-x ~") 'previous-error)
+(global-set-key (kbd "C-x /") 'next-error)
+(global-set-key (kbd "C-x '") 'previous-error)
 
 
 (global-set-key (kbd "C-c |") (lambda () 
@@ -877,31 +987,31 @@ Represents a preview of what a pull request diff will look like."
   (ansi-color-apply-on-region compilation-filter-start (point))
   (read-only-mode 1))
 
-(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+;; (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 
-(add-hook 'compilation-mode-hook
-		  (lambda ()
-			(font-lock-add-keywords nil
-			   '((" "
-				  (0 '(face nil font-lock-face nil
-					   compilation-message nil help-echo nil mouse-face nil) t)))
-			   'append)))
+;; (add-hook 'compilation-mode-hook
+;; 		  (lambda ()
+;; 			(font-lock-add-keywords nil
+;; 									'((" "
+;; 									   (0 '(face nil font-lock-face nil
+;; 												 compilation-message nil help-echo nil mouse-face nil) t)))
+;; 									'append)))
 
 
 
-(defun my-next-error (&optional arg reset)
-  "Better way of going to the next error in a compilation buffer.
-ARG and RESET are ignored."
-  (interactive "P")
-  (let ((buffer (next-error-find-buffer t)))
-	(when buffer
-	  ;; We know here that next-error-function is a valid symbol we can funcall
-	  (switch-to-buffer-other-window buffer)
-	  (compilation-next-error 1)
-	  (compile-goto-error)
-	  )))
+;; (defun my-next-error (&optional arg reset)
+;;   "Better way of going to the next error in a compilation buffer.
+;; ARG and RESET are ignored."
+;;   (interactive "P")
+;;   (let ((buffer (next-error-find-buffer t)))
+;; 	(when buffer
+;; 	  ;; We know here that next-error-function is a valid symbol we can funcall
+;; 	  (switch-to-buffer-other-window buffer)
+;; 	  (compilation-next-error 1)
+;; 	  (compile-goto-error)
+;; 	  )))
 
-(global-set-key (kbd "C-x \\") 'my-next-error)
+;; (global-set-key (kbd "C-x \\") 'my-next-error)
 
 
 
@@ -942,25 +1052,26 @@ file, define-local-services must be run after .dir-locals.el has
 been loaded.
 
 See an example of .dir-locals.el at the end of init.el."
- (when (boundp 'local-services)
-  (dolist (x local-services)
-	(prodigy-define-service
-	  :name (car x)
-	  :path (substitute-in-file-name (plist-get (cdr x) 'cwd))
-	  :cwd (substitute-in-file-name (plist-get (cdr x) 'cwd))
-	  :command (plist-get (cdr x) 'cmd)
-	  :env (plist-get (cdr x) 'env)
-	  :args (plist-get (cdr x) 'args)
-	  :tags (plist-get (cdr x) 'tags)
-	  :stop-signal 'sigkill
-	  :kill-process-buffer-on-stop t))))
-	
+  (message "loading services")
+  (when (boundp 'local-services)
+	(dolist (x local-services)
+	  (prodigy-define-service
+		:name (car x)
+		:path (substitute-in-file-name (plist-get (cdr x) 'cwd))
+		:cwd (substitute-in-file-name (plist-get (cdr x) 'cwd))
+		:command (plist-get (cdr x) 'cmd)
+		:env (plist-get (cdr x) 'env)
+		:args (plist-get (cdr x) 'args)
+		:tags (plist-get (cdr x) 'tags)
+		:stop-signal 'sigkill
+		:kill-process-buffer-on-stop t))))
+
 (defun restart-services(arg)
   "Start the services tagged with ARG or named ARG."
   (interactive "s(Re)start services with tag or name: ")   
   (do-with-services arg (lambda(s)(prodigy-restart-service s)))  
   (show-logs arg))
- 
+
 
 (defun kills-ervices(arg)
   "Stop the services tagged with ARG or named ARG."
@@ -978,48 +1089,48 @@ If ARG is 'a', toggles the group of services tagged with a."
   (interactive "sShow logs for services with tag or name: ") 
   (cond ((and (string= arg "a") service-group-a-visible-p)
 		 (setq service-group-a-visible-p nil)
-		  (hide-logs arg))
+		 (hide-logs arg))
 		(t
 		 (setq service-group-a-visible-p t)
 		 (let ((slotnumber 1))
 		   (do-with-services arg 					  
-			 (lambda(s)(let ((params `((side . left) (slot . ,slotnumber))))
-						 (message "params = %s" params)
-						 (-if-let (buffer (get-buffer (prodigy-buffer-name s)))
-							 (progn
-							   (display-buffer-in-side-window buffer params)
-							   (setq slotnumber (1+ slotnumber)))))))))))
+							 (lambda(s)(let ((params `((side . left) (slot . ,slotnumber))))
+										 (message "params = %s" params)
+										 (-if-let (buffer (get-buffer (prodigy-buffer-name s)))
+											 (progn
+											   (display-buffer-in-side-window buffer params)
+											   (setq slotnumber (1+ slotnumber)))))))))))
 
 (defun hide-logs(arg)
   "Hide logs for services tagged with ARG or named ARG."
   (interactive "sHide logs for services with tag or name: ") 
   (do-with-services arg (lambda(s)(-if-let (buffer (get-buffer (prodigy-buffer-name s)))
 									  (delete-windows-on buffer)))))
-												
+
 (defun do-with-services(arg fun)
   "Apply the function FUN to all Prodigy services that have a name or tag matching ARG."
-	(dolist (s prodigy-services)
-	  (when (or (member (intern arg) (plist-get s :tags))
-				(eq arg (plist-get s :name)))
-		(funcall fun s))))
-  
+  (dolist (s prodigy-services)
+	(when (or (member (intern arg) (plist-get s :tags))
+			  (eq arg (plist-get s :name)))
+	  (funcall fun s))))
+
 
 
 (defhydra hydra-services (:color blue :idle 0.5)
-   "
+  "
 Services
    "
-	("q" nil "quit")
-	("t" ((lambda() (show-logs "a"))) "Toggle group a" :column "Windows")
-	("l" show-logs "Show logs")
-	("h" hide-logs "Hide logs")
-	("p" prodigy "Processes")
-	("r" restart-services  "(Re)start" :column "Processes")
-	("k" kill-services "Kill")
-	("a" ((lambda()(restart-services "a"))) "Restart group a"))
+  ("q" nil "quit")
+  ("t" ((lambda() (show-logs "a"))) "Toggle group a" :column "Windows")
+  ("l" show-logs "Show logs")
+  ("h" hide-logs "Hide logs")
+  ("p" prodigy "Processes")
+  ("r" restart-services  "(Re)start" :column "Processes")
+  ("k" kill-services "Kill")
+  ("a" ((lambda()(restart-services "a"))) "Restart group a"))
 
 (global-set-key (kbd "C-c s") 'hydra-services/body)
-(global-set-key (kbd "C-t") (lambda ()(interactive) (show-logs "a")))
+;;(global-set-key (kbd "C-t") (lambda ()(interactive) (show-logs "a")))
 
 
 
@@ -1041,13 +1152,13 @@ Services
   "Create a function and a boolean variable with NAME and initial value DEFAULT.
 The function and the variable are given DOCSTRING."
   `(list 
-  (defun ,(intern name) ()
-	,docstring
-	 (interactive)
-	 (if ,(intern name)
-		 (setq ,(intern name) nil)
-	   (setq ,(intern name) t)))
-  (defvar ,(intern name) ,default ,docstring)))
+	(defun ,(intern name) ()
+	  ,docstring
+	  (interactive)
+	  (if ,(intern name)
+		  (setq ,(intern name) nil)
+		(setq ,(intern name) t)))
+	(defvar ,(intern name) ,default ,docstring)))
 
 
 
@@ -1056,15 +1167,15 @@ The function and the variable are given DOCSTRING."
 When NAME is called, it will read a value with PROMPT. The
 function and the variable are given DOCSTRING."
   `(list 
-  (defun ,(intern name) (arg)
-	,docstring
-	 (interactive (list (read-string ,prompt ,(intern name))))
-	 (if (string= arg "")
-		 (setq ,(intern name) nil)
-	   (setq ,(intern name) arg)))
-  (defun ,(intern (format "%s-display" name)) ()
-	(concat ,prompt ,(intern name)))
-  (defvar ,(intern name) ,default ,docstring)))
+	(defun ,(intern name) (arg)
+	  ,docstring
+	  (interactive (list (read-string ,prompt ,(intern name))))
+	  (if (string= arg "")
+		  (setq ,(intern name) nil)
+		(setq ,(intern name) arg)))
+	(defun ,(intern (format "%s-display" name)) ()
+	  (concat ,prompt ,(intern name)))
+	(defvar ,(intern name) ,default ,docstring)))
 
 
 ;; These are flags and settings we'll access with the Go mode hydra defined later.
@@ -1089,7 +1200,7 @@ on save.")
 			 (cond (modulep  (concat "cd " (go-module-dir) " && ")))
 			 "golangci-lint run")))
 	(message "Command = %s" cmd)
-  (compile-wrap cmd)))
+	(compile-wrap cmd)))
 
 
 (defun go-module-name()
@@ -1124,7 +1235,7 @@ on save.")
 (defun go-generate-module()
   "Run go generate on the Go module."
   (interactive)
- (compile-wrap (concat "cd  "
+  (compile-wrap (concat "cd  "
 						(go-module-dir)
 						" && go generate")))
 
@@ -1133,18 +1244,18 @@ on save.")
   "Run go test on a package (default) or the module if MODULEP is t."
   (interactive)
   (let((cmd (concat
-	(cond ((or modulep (not go-test-package-only)) (concat "cd " (go-module-dir) " && "))
-	 	  ((not (string= go-test-path ""))(concat "cd " go-test-path " && ")))
-	(concat " " go-test-env " ")
-	"go test "
-	(if (not (string= go-test-run "")) (concat " -run=" go-test-run " "))
-	(if (not (string= go-test-tags "")) (concat " -tags=" go-test-tags " "))
-	(if (not (string= go-test-timeout "")) (concat " -timeout=" go-test-timeout " "))
-	(if go-test-short '" -short ")
-	(if go-test-verbose	'" -v ")
-	(if (or modulep (not go-test-package-only)) "./..."))))
-  (message "Command = %s" cmd)
-  (compile-wrap cmd)))
+			 (cond ((or modulep (not go-test-package-only)) (concat "cd " (go-module-dir) " && "))
+	 			   ((not (string= go-test-path ""))(concat "cd " go-test-path " && ")))
+			 (concat " " go-test-env " ")
+			 "go test "
+			 (if (not (string= go-test-run "")) (concat " -run=" go-test-run " "))
+			 (if (not (string= go-test-tags "")) (concat " -tags=" go-test-tags " "))
+			 (if (not (string= go-test-timeout "")) (concat " -timeout=" go-test-timeout " "))
+			 (if go-test-short '" -short ")
+			 (if go-test-verbose	'" -v ")
+			 (if (or modulep (not go-test-package-only)) "./..."))))
+	(message "Command = %s" cmd)
+	(compile-wrap cmd)))
 
 (defun go-test-module-benchmarks()
   "Run benchmarks for the Go module."
@@ -1154,14 +1265,6 @@ on save.")
 						(go-module-name)
 						" ./...")))
 
-
-
-
-(cond
- ((or 1 3) '1)
- (2 '2)
- (t
-  'other))
 
 
 ;; Go package site serves a web site for browsing go documentation for a module.
@@ -1192,17 +1295,63 @@ ARG is the full path to the directory where you want to run the
 
 ;; Go mode setup
 
-;: shortcut to this location: gox
+										;: shortcut to this location: gox
 
-(use-package go-mode
-  :ensure t
-  :defer t
-  :mode "\\(\\.go\\|go.mod\\|go.sum\\)\\'"
-  :mode-hydra
-  ((:title "Go" :separator " " :formatter my-hydra-formatter :idle 0.5)
-   ("Testing"
-	(("m" ((lambda()(go-test t))) "module")
-	 ("t" go-test "package")
+;; (use-package go-mode
+;;   :ensure t
+;;   :defer t
+;;    :mode "\\(\\.go\\|go.mod\\|go.sum\\)\\'"
+;;   ;;:mode "\\.go\\"
+;;   :mode-hydra
+;;   ((:title "Go" :separator " " :formatter my-hydra-formatter :idle 0.5)
+;;    ("Testing"
+;; 	(("m" ((lambda()(go-test t))) "module")
+;; 	 ("t" go-test "package")
+;; 	 ("o" go-test-package-only "package only on save" :toggle t)
+;; 	 ("c" go-test-coverage-in-emacs "coverage")
+;; 	 ("b" go-test-module-benchmarks "benchmarks")
+;; 	 ("e" go-test-env (go-test-env-display))
+;; 	 ("u" go-test-run (go-test-run-display))
+;; 	 ("g" go-test-tags (go-test-tags-display))
+;; 	 ("z" go-test-timeout (go-test-timeout-display))
+;; 	 ("s" go-test-short "short" :toggle t)
+;; 	 ("v" go-test-verbose "verbose" :toggle t)
+;; 	 ("h" go-test-path (go-test-path-display))
+;; 	 )
+;; 	"Lint"
+;; 	(("x" ((lambda()(go-lint t)))  "module")
+;; 	 ("l" go-lint "package")
+;; 	 )
+;; 	"Navigation"
+;; 	(("a" go-open-alternate-file "alternate file")
+;; 	 ("f" helm-projectile "find file")
+;; 	 ("i" lsp-ui-imenu "imenu"))
+;; 	"Git"
+;; 	(("d" magit-diff-to-main "diff to main"))
+;; 	"Misc"
+;; 	(("k" go-generate-module "go generate")
+;; 	 ("r" lsp-rename "rename")
+;; 	 )))
+;;   :config
+;;   (add-to-list 'auto-mode-alist '("\\.gohtml\\'" . html-mode))
+;;   (setq gofmt-command "goimports")
+;;   (add-hook 'go-mode-hook
+;; 			(lambda ()	
+;; 			  (message "loading go-mode hook")
+;; 			  (common-go-setup))))
+
+
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
+(add-hook 'go-ts-mode-hook 
+		  (lambda()
+			(common-go-setup)))
+
+
+  (pretty-hydra-define hydra-go-test
+	(:title "Go Test" :separator " " :formatter my-hydra-formatter :idle 0.1 :color blue)
+	("Test"
+	 (("m" ((lambda()(go-test t))) "module")
+	 ("p" go-test "package")
 	 ("o" go-test-package-only "package only on save" :toggle t)
 	 ("c" go-test-coverage-in-emacs "coverage")
 	 ("b" go-test-module-benchmarks "benchmarks")
@@ -1213,46 +1362,40 @@ ARG is the full path to the directory where you want to run the
 	 ("s" go-test-short "short" :toggle t)
 	 ("v" go-test-verbose "verbose" :toggle t)
 	 ("h" go-test-path (go-test-path-display))
-	 )
-	"Lint"
-	(("x" ((lambda()(go-lint t)))  "module")
-	 ("l" go-lint "package")
-	 )
-	"Navigation"
-	(("a" go-open-alternate-file "alternate file")
-	 ("f" helm-projectile "find file")
-	 ("i" lsp-ui-imenu "imenu"))
-	"Git"
-	(("d" magit-diff-to-main "diff to main"))
-	"Misc"
-	(("k" go-generate-module "go generate")
-	 ("r" lsp-rename "rename")
+	 ("t" ((lambda()(interactive)(toggle-window "*compilation*"))) "toggle *compilation*")
 	 )))
-  :config
-  (add-to-list 'auto-mode-alist '("\\.gohtml\\'" . html-mode))
+
+(global-set-key (kbd "C-c t") 'hydra-go-test/body)
+
+(require 'gofmt)
+(not go-package-site-dir)
+(defun common-go-setup() 
+  (hack-dir-local-variables-non-file-buffer)		 ; load .dir-locals.el
+  (when (not go-package-site-dir)
+	(setq go-package-site-dir (projectile-project-root)))
+  (define-pkgsite-service go-package-site-dir)		 ; set dir for Go doc server
+  (define-local-services)							 
+  (if (not (string-match "go" compile-command))		 ; set default compile command
+	  (set (make-local-variable 'compile-command)
+		   "go build -v && go test -v -short && go vet"))
+  (setq fill-column 90)
+;;  (setq indent-tabs-mode nil) 
+  (setq tab-width 2)
+  ;;(setq indent-line-function 'insert-tab)
   (setq gofmt-command "goimports")
-  (add-hook 'go-mode-hook
-		(lambda ()		  
-		  (hack-dir-local-variables-non-file-buffer)		 ; load .dir-locals.el
-		  (define-pkgsite-service go-package-site-dir)		 ; set dir for Go doc server
-		  ; set up services defined in .dir-locals.el
-		  
-		  (define-local-services)							 
-		  (modify-syntax-entry ?= "w" go-mode-syntax-table)	 ; make = part of a word
-		  (modify-syntax-entry ?.  "_" go-mode-syntax-table) ; make . part of a word
-		  (if (not (string-match "go" compile-command))		 ; set default compile command
-			  (set (make-local-variable 'compile-command)
-				   "go build -v && go test -v -short && go vet"))
-		  (setq fill-column 90)
-		  (setq tab-width 2)
-		  (company-mode)
-		  (lsp-deferred)
-		  (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local)
-		  (add-hook 'after-save-hook 'go-test nil 'make-it-local))))
-
-
-
-
+  (setq go-ts-mode-indent-offset 2)
+  (subword-mode 1)
+  (company-mode)
+  (electric-pair-mode)
+  (cond 
+   ((string= language-server "lsp")
+	(message "activating lsp in go mode")
+	(lsp-deferred))
+   ((string= language-server "eglot")
+	(message "activating eglot in go mode")
+	(eglot-ensure)))
+  (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local))
+;  (add-hook 'after-save-hook 'go-test nil 'make-it-local))
 
 
 ;; --------------------------------------------------------------------- MISC LANGUAGES
@@ -1287,21 +1430,21 @@ ARG is the full path to the directory where you want to run the
 
 
 
-(major-mode-hydra-define emacs-lisp-mode  (:formatter my-hydra-formatter)
-  ("Eval"
-   (("b" eval-buffer "buffer")
-	("e" eval-defun "defun")
-	("r" eval-region "region"))
-   "REPL"
-   (("I" ielm "ielm"))
-   "Test"
-   (("t" ert "prompt")
-	("T" (ert t) "all")
-	("F" (ert :failed) "failed"))
-   "Doc"
-   (("f" describe-function "function")
-	("v" describe-variable "variable")
-	("i" info-lookup-symbol "info lookup"))))
+;; (major-mode-hydra-define emacs-lisp-mode  (:formatter my-hydra-formatter)
+;;   ("Eval"
+;;    (("b" eval-buffer "buffer")
+;; 	("e" eval-defun "defun")
+;; 	("r" eval-region "region"))
+;;    "REPL"
+;;    (("I" ielm "ielm"))
+;;    "Test"
+;;    (("t" ert "prompt")
+;; 	("T" (ert t) "all")
+;; 	("F" (ert :failed) "failed"))
+;;    "Doc"
+;;    (("f" describe-function "function")
+;; 	("v" describe-variable "variable")
+;; 	("i" info-lookup-symbol "info lookup"))))
 
 
 (use-package web-mode
@@ -1314,15 +1457,15 @@ ARG is the full path to the directory where you want to run the
   (add-to-list 'web-mode-comment-formats '("javascript" . "//" ))
   ;; Parser for svelte-check output
   (add-to-list 'compilation-error-regexp-alist   
-    '("^[0-9]* \\(ERROR\\|WARNING\\) \"\\([^\"]*\\)\" \\([0-9]*\\):\\([0-9]*\\) .*$" 2 3 4))
+			   '("^[0-9]* \\(ERROR\\|WARNING\\) \"\\([^\"]*\\)\" \\([0-9]*\\):\\([0-9]*\\) .*$" 2 3 4))
   :mode "\\(\\.svelte\\|.ts\\)\\'"
   )
 
 
 
 (add-hook 'web-mode-hook #'lsp)
-  (setq web-mode-engines-alist
-		'(("svelte" . "\\.svelte\\'")))
+(setq web-mode-engines-alist
+	  '(("svelte" . "\\.svelte\\'")))
 
 (use-package terraform-mode
   :defer t
@@ -1458,7 +1601,7 @@ This variable is here just to inform the Hydra so it can display the status corr
 ;;; --------------------------------------------------------------------- WINDOWS
 
 ;; Enable desktop restore to work in terminal windows.
-; https://emacs.stackexchange.com/questions/19190/desktop-save-mode-fails-to-save-window-layout
+										; https://emacs.stackexchange.com/questions/19190/desktop-save-mode-fails-to-save-window-layout
 
 (setq desktop-restore-forces-onscreen nil)
 (add-hook 'desktop-after-read-hook
@@ -1478,14 +1621,16 @@ This variable is here just to inform the Hydra so it can display the status corr
 	  (quit-window nil (get-buffer-window name))
 	(display-buffer name)))
 
+(setq winner-dont-bind-my-keys t)
+(winner-mode +1)
 
 ;; Easily navigate between windows
 (use-package windmove
   :ensure t
   :bind (("C-c <up>"    . windmove-up)
-	 ("C-c <down>"  . windmove-down)
-	 ("C-c <left>"  . windmove-left)
-	 ("C-c <right>" . windmove-right))
+		 ("C-c <down>"  . windmove-down)
+		 ("C-c <left>"  . windmove-left)
+		 ("C-c <right>" . windmove-right))
   :config
   (setq windmove-wrap-around t))
 
@@ -1535,25 +1680,25 @@ and display the buffer."
   "Swap places of two windows."
   (interactive)
   (cond ((not (> (count-windows)1))
-		(t
-		 (setq i 1)
-		 (setq numWindows (count-windows))
-		 (while  (< i numWindows)
-		   (let* (
-				  (w1 (elt (window-list) i))
-				  (w2 (elt (window-list) (+ (% i numWindows) 1)))
+		 (t
+		  (setq i 1)
+		  (setq numWindows (count-windows))
+		  (while  (< i numWindows)
+			(let* (
+				   (w1 (elt (window-list) i))
+				   (w2 (elt (window-list) (+ (% i numWindows) 1)))
 
-				  (b1 (window-buffer w1))
-				  (b2 (window-buffer w2))
+				   (b1 (window-buffer w1))
+				   (b2 (window-buffer w2))
 
-				  (s1 (window-start w1))
-				  (s2 (window-start w2))
-				  )
-			 (set-window-buffer w1  b2)
-			 (set-window-buffer w2 b1)
-			 (set-window-start w1 s2)
-			 (set-window-start w2 s1)
-			 (setq i (1+ i))))))))
+				   (s1 (window-start w1))
+				   (s2 (window-start w2))
+				   )
+			  (set-window-buffer w1  b2)
+			  (set-window-buffer w2 b1)
+			  (set-window-start w1 s2)
+			  (set-window-start w2 s1)
+			  (setq i (1+ i))))))))
 
 ;; Force new shells to open in current window
 ;; https://emacs.stackexchange.com/questions/44831/how-to-force-new-shell-to-appear-in-current-window
@@ -1577,33 +1722,35 @@ If negative, make shorter."
 
 ;; Hydra to toggle the display of specific windows.
 (defhydra hydra-toggle (:color blue)
+  "
+Windows
    "
-Toggle Windows
-   "
-	("q" nil "quit")
-	("m" ((lambda() (interactive) (toggle-window "*Messages*"))) "messages")
-	("c" ((lambda() (interactive) (toggle-window "*compilation*"))) "compilation" 
-	 :column "Compilation")
-	("h" ((lambda() (interactive) (toggle-window "*Help*"))) "help" :column "Help")
+  ("q" nil "quit")
+  ("u" winner-undo "undo" :column "Layout")
+  ("r" winner-redo "redo")
+  ("f" flip-windows "flip")
+  ("r" rotate-windows "rotate")
+  ("c" ((lambda() (interactive) (toggle-window "*compilation*"))) "compilation" :column "Compilation")
+  ("m" ((lambda() (interactive) (toggle-window "*Messages*"))) "messages")
+  ("h" ((lambda() (interactive) (toggle-window "*Help*"))) "help" :column "Help")
 
-	("b" ((lambda() (interactive) (toggle-window "*Backtrace*"))) "backtrace")
-	("w" ((lambda() (interactive) (toggle-window "*Warnings*"))) "warnings")
-	("o" ((lambda() (interactive) (toggle-window "*Occur*"))) "occur" :column "Search")
-	("l" ((lambda() (interactive) (toggle-window "*Output*"))) "output")
-	("d" ((lambda() (interactive) (toggle-window "*lsp-help*"))) "lsp-help")
-	("y" ((lambda() (interactive) (toggle-window "*YASnippet Tables*"))) "YASnippet List")
-	("d" toggle-window-dedicated "dedicated" :column "Other")
-	("_" shell-pop "terminal")
-	("e" treemacs "treemacs")
-	)
+  ("b" ((lambda() (interactive) (toggle-window "*Backtrace*"))) "backtrace")
+  ("w" ((lambda() (interactive) (toggle-window "*Warnings*"))) "warnings")
+  ("o" ((lambda() (interactive) (toggle-window "*Occur*"))) "occur" :column "Search")
+  ("l" ((lambda() (interactive) (toggle-window "*Output*"))) "output")
+  ("d" ((lambda() (interactive) (toggle-window "*lsp-help*"))) "lsp-help")
+  ("y" ((lambda() (interactive) (toggle-window "*YASnippet Tables*"))) "YASnippet List")
+  ("d" toggle-window-dedicated "dedicated" :column "Other")
+  ("_" shell-pop "terminal")
+  ("e" treemacs "treemacs")
+  )
 
-(global-set-key (kbd "C-c q") 'hydra-toggle/body)
+(global-set-key (kbd "C-c w") 'hydra-toggle/body)
 
 
 ;;; --------------------------------------------------------------------- OS X
 
 (when (eq system-type 'darwin)
-  (message "Running MacOS Setup")
 
   (defun pasteboard-copy()
 	"Copy region to OS X system pasteboard."
@@ -1742,6 +1889,7 @@ Toggle Windows
   ("l" ((lambda() (interactive) (load-theme 'leuven t))))
   ("n" ((lambda() (interactive) (load-theme 'nord t))))
   ("b" ((lambda() (interactive) (load-theme 'borland-blue t))))
+  ("f" ((lambda() (interactive) (load-theme 'material-light t))))
   ("|" display-fill-column-indicator-mode nil)
   ("z" wide-margins :color red)
   ("Z" ((lambda() (interactive) (wide-margins t))) :color red)
@@ -1790,16 +1938,19 @@ The chance of generating the same UUID is much higher than a robust algorithm."
 
 
 (defun toggle-window-dedicated ()
-"Toggle whether the current active window is dedicated or not.
+  "Toggle whether the current active window is dedicated or not.
 Emacs will not reuse a dedicated window for output, such as compilation."
-(interactive)
-(message
- (if (let (window (get-buffer-window (current-buffer)))
-	   (set-window-dedicated-p window
-		(not (window-dedicated-p window))))
-	"Window '%s' is dedicated"
-	"Window '%s' is normal")
- (current-buffer)))
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+		 (set-window-dedicated-p window
+								 (not (window-dedicated-p window))))
+	   "Window '%s' is dedicated"
+	 "Window '%s' is normal")
+   (current-buffer)))
+
+(require 'go-template-mode)
+(add-to-list 'auto-mode-alist '("\\.tmpl\\'" . go-template-mode))
 
 ;;; --------------------------------------------------------------------- SAMPLE DIR LOCAL
 
@@ -1825,9 +1976,406 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 ;; sentence-end-double-space: nil
 ;; End:
 
+(use-package fzf
+  :ensure t
+  :bind
+  ;; Don't forget to set keybinds!
+  :config
+  (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll "
+		;; fzf/args "-x --print-query --margin=1,0 --no-hscroll --preview 'bat --color=always --style=header,grid --line-range :300 {}'"
+        fzf/args-for-preview "--preview 'bat --color=always --style=header,grid --line-range :100 {}'"
+        fzf/args-for-preview ""
+		fzf/executable "fzf"
+        fzf/git-grep-args "-i --line-number %s"
+        ;; command used for `fzf-grep-*` functions
+        ;; example usage for ripgrep:
+        ;; fzf/grep-command "rg --no-heading -nH"
+        fzf/grep-command "grep -nrH"
+        ;; If nil, the fzf buffer will appear at the top of the window
+        fzf/position-bottom t
+        fzf/window-height 25))
 
-(message "end of init.el")
-(use-package go-fill-struct 
-  :ensure t)
+(defhydra hydra-find (:color blue)
+  "
+Find Stuff
+   "
+  ("q" nil "quit")
+  ("f" ((lambda() (interactive) (fzf-projectile t))) "files in project")
+  ("b" ((lambda() (interactive) (fzf-switch-buffer))) "buffer")
+  ("r" ((lambda() (interactive) (fzf-recentf t))) "recent")
+  ("g" ((lambda() (interactive) (ezfzf-git-grep))) "git grep")
+  ("*" ((lambda() (interactive) (ezfzf-git-grep-word))) "git grep *")
+  )
+
+(run-with-idle-timer
+ 2
+ nil
+ `(lambda() (recentf-mode 1)))
+
+(global-set-key (kbd "C-c f") 'hydra-find/body)
+
+
+
+
+(defun ezfzf-git-grep-word ()
+  (interactive)
+  (let ((fzf--target-validator (fzf--use-validator
+                                (function fzf--pass-through)))
+        (fzf--extractor-list (fzf--use-extractor
+                              (list fzf--file-lnum-regexp 1 2))))
+    (fzf-with-command 
+	 (format (concat "git grep " fzf/git-grep-args) (shell-quote-argument "")) ; COMMAND
+     #'fzf--action-find-file-with-line  ; ACTION
+     (locate-dominating-file default-directory ".git") ; DIRECTORY
+	 t ; AS_FILTER
+	 (thing-at-point 'word 'no-properties) ; INITQ
+	 nil ; FILE-PATTERN
+	 )))
+
+
+(defun ezfzf-git-grep ()
+  (interactive)
+  (let ((fzf--target-validator (fzf--use-validator
+                                (function fzf--pass-through)))
+        (fzf--extractor-list (fzf--use-extractor
+                              (list fzf--file-lnum-regexp 1 2))))
+    (fzf-with-command (format (concat "git grep " fzf/git-grep-args) (shell-quote-argument ""))
+                      #'fzf--action-find-file-with-line
+                      (locate-dominating-file default-directory ".git"))))
+
+
 ;;; init.el ends here
+
+(custom-set-faces
+ '(treemacs-root-face ((t (:height 1 :weight bold :foreground "#799B8E" )))))
+
+;; (use-package telephone-line
+;;   :custom 
+;;   (telephone-line-primary-left-separator 'telephone-line-cubed-hollow-left)
+;;   (telephone-line-secondary-left-separator 'telephone-line-flat)
+;;   (telephone-line-primary-right-separator 'telephone-line-cubed-right)
+;;   (telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+;;   (telephone-line-height 24)
+;;   (telephone-line-evil-use-short-tag t)  
+;;   :config
+;;   (telephone-line-defsegment telephone-line-pdf-segment ()
+;; 			     (if (eq major-mode 'pdf-view-mode)
+;; 				 (propertize (pdf-view-page-number)
+;; 					     'face '(:inherit)
+;; 					     'display '(raise 0.0)
+;; 					     'mouse-face '(:box 1)
+;; 					     'local-map (make-mode-line-mouse-map
+;; 							 'mouse-1 (lambda ()
+;; 								    (interactive)
+;; 								    (pdf-view-goto-page))))))
+;;   (telephone-line-defsegment telephone-line-winum-segment ()
+;; 			     (propertize winum--mode-line-segment
+;; 					 'face '(:box (:line-width 2 :color "cyan" :style released-button))		
+;; 					 'display '(raise 0.0)
+;; 					 'mouse-face '(:box 1)))
+;;   (setq telephone-line-lhs '((accent . (telephone-line-winum-segment
+;; 					telephone-line-pdf-segment
+;; 					telephone-line-vc-segment
+;; 					telephone-line-erc-modified-channels-segment
+;; 					telephone-line-process-segment))
+;; 			     (nil . (telephone-line-projectile-segment telephone-line-buffer-segment))))
+;;   (telephone-line-mode t))
+
+
+;; (use-package doom-modeline
+;;   :ensure t
+;;   :init (doom-modeline-mode 1)
+;;   :config
+;;   (setq doom-modeline-workspace-name t
+;; 		doom-modeline-lsp t
+;; 		doom-modeline-time t   
+;; ))
+
+;; (use-package telephone-line
+;;   :init
+;;   (defface +telephone/position-face '((t (:foreground "red" :background "grey10"))) "")
+;;   (defface +telephone/mode-face '((t (:foreground "white" :background "dark green"))) "")
+;;   (defface +telephone/file-info-face '((t (:foreground "white" :background "Dark Blue"))) "")
+;;   :custom
+;;   (telephone-line-faces
+;;    '((evil      . telephone-line-modal-face)
+;;      (modal     . telephone-line-modal-face)
+;;      (ryo       . telephone-line-ryo-modal-face)
+;;      (accent    . (telephone-line-accent-active . telephone-line-accent-inactive))
+;;      (nil         . (mode-line                    . mode-line-inactive))
+;;      (position  . (+telephone/position-face     . mode-line-inactive))
+;;      (mode      . (+telephone/mode-face         . mode-line-inactive))
+;;      (file-info . (+telephone/file-info-face    . mode-line-inactive))))
+;;   (telephone-line-primary-left-separator    'telephone-line-flat)
+;;   (telephone-line-secondary-left-separator  'telephone-line-flat)
+;;   (telephone-line-primary-right-separator   'telephone-line-flat)
+;;   (telephone-line-secondary-right-separator 'telephone-line-flat)
+;;   (telephone-line-height 24)
+;;   (telephone-line-evil-use-short-tag nil)
+;;   :config
+;;   (telephone-line-defsegment +telephone/buffer-or-filename ()
+;;     (cond
+;;      ((buffer-file-name)
+;;       (if (and (fboundp 'projectile-project-name)
+;;              (fboundp 'projectile-project-p)
+;;              (projectile-project-p))
+;;           (list ""
+;;                 (funcall (telephone-line-projectile-segment) face)
+;;                 (propertize
+;;                  (concat "/"
+;;                          (file-relative-name (file-truename (buffer-file-name))
+;;                                              (projectile-project-root)))
+;;                  'help-echo (buffer-file-name)))
+;;         (buffer-file-name)))
+;;      (t (buffer-name))))
+
+;;   (telephone-line-defsegment +telephone/get-position ()
+;;     `(,(concat "%lL:%cC"
+;;                (if (not mark-active)
+;;                    ""
+;;                  (format " | %dc" (- (+ 1 (region-end)) (region-beginning)))))))
+
+;;   (setq-default
+;;    telephone-line-lhs '((mode telephone-line-major-mode-segment)
+;;                         (file-info telephone-line-input-info-segment)
+;;                         (position +telephone/get-position)
+;;                         (accent   +telephone/buffer-or-filename
+;;                                   telephone-line-process-segment))
+;;    telephone-line-rhs '((accent telephone-line-flycheck-segment telephone-line-misc-info-segment
+;;                                 telephone-line-projectile-segment)
+;;                         (file-info telephone-line-filesize-segment)
+;;                         (evil  telephone-line-evil-tag-segment)))
+;;   (telephone-line-mode))
+
+
+(defvar ml-selected-window nil)
+
+;; Important changes start here
+(defun ml-record-selected-window ()
+  (setq ml-selected-window (selected-window)))
+
+(defun ml-update-all ()
+  (force-mode-line-update t))
+
+(add-hook 'post-command-hook 'ml-record-selected-window)
+(add-hook 'buffer-list-update-hook 'ml-update-all)
+
+
+(setq-default
+ mode-line-format
+ '((:eval
+    (ez/simple-mode-line-render
+     ;; Left side
+     (quote (
+			 (:eval (propertize " EMACS " 'face 
+								(if (eq ml-selected-window (selected-window))
+								  '(:background "#FE8019" :foreground "#343130" :weight bold )
+									'(:background "#9D8E7A" :foreground "#343130" :weight bold ))))
+			 (:eval (propertize "  " 'face 
+								(if (eq ml-selected-window (selected-window))	
+									'(:foreground "#FE8019" :background "#46403D" :weight bold )					
+								'(:foreground "#9D8E7A" :background "#46403D"))))
+			 (:eval (propertize  (ez/git-branch)
+								 'face
+								 '(:foreground "#E7D6AC" :background "#46403D"))) 
+			 (:eval (propertize "  " 'face 
+								'(:foreground "#46403D" :background "#343130")))
+			 (:eval (propertize (ez/change-indicator) 'face 
+									(if (buffer-modified-p)
+									'(:foreground "#fabd2f" :weight bold))))
+             "%b" ;; buffer name 
+             ))
+     ;; Right right side
+     (quote (
+			 " "
+			 (:eval (ez/short-directory-name 20))
+			 " "
+			 (:eval (ez/mode-name))
+			 " "
+			 (:eval (ez/lsp-name))
+			 " "
+			 (:eval (propertize " " 'face 
+								'(:foreground "#46403D" :background "#343130")))
+			 (:eval (propertize "  %l:%C " 'face 
+								'(:foreground "#9D8E7A" :background "#46403D")))
+			 (:eval (propertize " " 'face 
+								'(:foreground "#9D8E7A" :background "#46403D")))
+			 
+			 (:eval (propertize (concat " " (format-time-string "%l:%M %p" (current-time) "CST6CDT") "   ") 'face 
+								'(:background "#9D8E7A" :foreground "#343130" :weight bold ))) 
+
+ 			 ))))))
+
+(defun ez/git-branch()
+  "Return a string with the git branch of the current buffer."
+  (if (fboundp 'vc-git--symbolic-ref)
+	  ;; need this if statement because vc-git--symbolic-ref will be bound
+	  ;; if ANY buffer is under vc; but if the current buffer isn't it will 
+	  ;; return nil in the let, causing an error
+	  (if (and (buffer-file-name) (vc-git--symbolic-ref (buffer-file-name)))
+		  (let ((branch (vc-git--symbolic-ref (buffer-file-name))))
+			(if (stringp branch)
+				(concat "  " branch "  ")
+			  "Nope"))
+		"   ")
+	"    "))
+ 
+
+(defun ez/change-indicator()
+  "A graphical representation of whether the buffer is modified or not."
+  (if (buffer-modified-p)
+	  (concat "    ")
+	(concat "    ")))
+
+(defun ez/mode-name()
+  "How to display the major mode name in the mode line."
+  (concat (downcase mode-name)))
+
+(defun ez/lsp-name()
+  "The text to display when LSP is enabled and connected to an LSP server."
+  (when (fboundp 'lsp-workspaces)
+	(let ((servers (mapconcat #'lsp--workspace-print (lsp-workspaces) " ")))
+	  (when (not (string= servers ""))
+		(format "﮼ %s " servers)))))
+
+;; (defun ez/col-line()
+;;   "Text displayed for the column and line location in the mode line."
+
+
+(defun ez/simple-mode-line-render (left right)
+  "Return a string of `window-width' length.
+Containing LEFT, and RIGHT aligned respectively. Used to format the modeline text."
+  (let ((available-width
+         (- (window-total-width)
+            (+ (length (format-mode-line left))
+			   (length (format-mode-line right))))))
+    (append left
+            (list (format (format "%%%ds" available-width) ""))
+            right)))
+
+
+  ;; ;; TODO: something else 
+
+  ;; (advice-add #'vc-git-mode-line-string :filter-return #'ez/replace-git-status)
+  ;; (defun ez/replace-git-status (tstr)
+  ;; 	"Advice to reformat the Git mode line string (TSTR)."
+  ;; 	(let* ((tstr (replace-regexp-in-string "Git" "" tstr))
+  ;;          (first-char (substring tstr 0 1))
+  ;;          (rest-chars (substring tstr 1)))
+  ;;     (concat "  " (cond
+  ;; 					 ((string= ":" first-char) ;;; Modified
+  ;; 					  (replace-regexp-in-string "^:" "" tstr))
+  ;; 					 ((string= "-" first-char) ;; No change
+  ;; 					  (replace-regexp-in-string "^-" "" tstr))
+  ;; 					 (t tstr)))))
+
+  ;; TODO something 
+  (defun  ez/short-directory-name(maxlength)
+	"Make a short directory name, up to MAXLENGTH characters long."
+	(and (stringp (buffer-file-name))
+		 (let ((name (abbreviate-file-name (directory-file-name (file-name-directory (buffer-file-name))))))
+		   (ez/shorten-name name maxlength))))
+
+  (defun ez/shorten-name(name maxlength)
+	"Recursively shorten the directory NAME by removing elements of the path starting at the front, as long as there are path elements to remove and the length of the string exceeds MAXLENGTH."
+	(when (and (> (length name) maxlength) (string-match "/" name))
+	  (let ((arr (split-string name "/")))
+		(setq name (ez/shorten-name (combine-and-quote-strings (cons ".." (cdr (cdr arr))) "/") maxlength))))
+	name)
+
+
+(use-package magit-todos
+  :ensure t
+  :config 
+  (magit-todos-mode))
+
+  (use-package hl-todo 
+	;; Highlights TODO in text 
+	:ensure t
+	:config 
+	(custom-set-faces
+	 '(hl-todo ((t (:weight bold :slant italic :foreground "#000000" :background "#8AA497")))))
+	(setq hl-todo-keyword-faces
+		  '(("TODO" . "#000000")))
+	(global-hl-todo-mode))
+
+
+
+
+  ;; (defvar bootstrap-version)
+  ;; (let ((bootstrap-file
+  ;; 		 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+  ;; 		(bootstrap-version 6))
+  ;; 	(unless (file-exists-p bootstrap-file)
+  ;;     (with-current-buffer
+  ;;         (url-retrieve-synchronously
+  ;;          "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+  ;;          'silent 'inhibit-cookies)
+  ;; 		(goto-char (point-max))
+  ;; 		(eval-print-last-sexp)))
+  ;; 	(load bootstrap-file nil 'nomessage))
+
+  ;; (straight-use-package 'use-package)
+
+  ;; (defvar native-comp-deferred-compilation-deny-list nil)
+  ;; (use-package treemacs-devicons
+  ;; 	:straight (treemacs-devicons
+  ;;              :type git :host github :repo "rainstormstudio/treemacs-devicons")
+  ;; 	:config
+  ;; 	(treemacs-load-theme "devicons"))
+
+
+  (use-package treemacs-devicons
+	:load-path "~/.config/emacs/local/treemacs-devicons"
+	:config
+	(treemacs-load-theme "devicons"))
+
+
+
+(defun wordp (c) (= ?w (char-syntax c)))
+(defun lowercasep (c) (and (wordp c) (= c (downcase c))))
+(defun uppercasep (c) (and (wordp c) (= c (upcase c))))
+
+(defun toggle-letter-case ()
+  (interactive)
+  (save-excursion
+	(setq p1 (point))
+	(right-char)
+	(setq p2 (point)))
+  (if (lowercasep (char-after))
+	  (upcase-region p1 p2)
+	(downcase-region p1 p2)))
+
+;; TODO something 
+(global-set-key (kbd "M-c") 'toggle-letter-case)
+
+
+(defgroup ez-compilation-group nil
+  "Group for customization"
+  :prefix "ez-")
+
+(defface ez-highlight-go-pass-face
+  '((t :inherit (default)
+	   :background "#b8bb26"
+       :foreground "#000000"))
+  "Face to highlight that Go test passed"
+  :group 'ez-compilation-group)
+
+(defface ez-highlight-go-fail-face
+  '((t :inherit (default)
+	   :background "firebrick"
+       :foreground "#ffffff"))
+  "Face to highlight that Go test failed"
+  :group 'ez-compilation-group)
+
+
+
+(add-hook 'compilation-mode-hook
+          (lambda ()
+            (font-lock-add-keywords nil
+                                    '(("\\(PASS\\)[^:]" 1 'ez-highlight-go-pass-face t)
+                                      ("\\(FAIL\\)[^:]" 1 'ez-highlight-go-fail-face t)))
+			(font-lock-fontify-buffer)))
+
+
 

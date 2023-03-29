@@ -1,7 +1,7 @@
 .DS_Store
 /emacs/.cache
 /emacs/.dap-breakpoints
-/emacs/.extension	
+/emacs/.extension
 /emacs/.lsp-session*
 /emacs/auto-save-list
 /emacs/custom.el
@@ -22,3 +22,6 @@
 /go/env
 /kitty/.kitty.conf.swp
 /dlv
+/code-server
+/flutter
+/htop

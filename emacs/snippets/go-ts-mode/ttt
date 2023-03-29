@@ -15,7 +15,7 @@ func Test${1:Something}(t *testing.T) {
 	}{
 	{${2:params}}
 	} {
-	  
+	  c := c 
 	  t.Run(c.name, func(t *testing.T){
 	  t.Parallel()
 		got, err := ${3:function}(c.in)
