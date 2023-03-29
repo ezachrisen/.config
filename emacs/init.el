@@ -1981,12 +1981,13 @@ Emacs will not reuse a dedicated window for output, such as compilation."
   :bind
   ;; Don't forget to set keybinds!
   :config
-  (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll "
+  (setenv "FZF_DEFAULT_COMMAND" "rg --files --follow -g '!node_modules' -g '!gowsdl' -g '!wsdl' -g '!*.serviceV2.go' -g '!*.pb.go' -g '!vendor/' -g '!*.pb.gw.go' -g '!*.pb.validate.go'")
+  (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll"
 		;; fzf/args "-x --print-query --margin=1,0 --no-hscroll --preview 'bat --color=always --style=header,grid --line-range :300 {}'"
         fzf/args-for-preview "--preview 'bat --color=always --style=header,grid --line-range :100 {}'"
         fzf/args-for-preview ""
 		fzf/executable "fzf"
-        fzf/git-grep-args "-i --line-number %s"
+        fzf/git-grep-args "-i --line-number %s ':!*.pb.validate.go' ':!.dockerignore' ':!.gcloudignore' ':!.moreignore' ':!.vscode/**' ':!.moreignore' ':!.gitattributes' ':!.gitignore' ':(exclude,glob)**/vendor/**' ':!*.pb.go' ':!*.d.ts' ':!*_pb.js' ':!gowsdl/' ':!wsdl/' "
         ;; command used for `fzf-grep-*` functions
         ;; example usage for ripgrep:
         ;; fzf/grep-command "rg --no-heading -nH"
