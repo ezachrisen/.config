@@ -12,7 +12,7 @@
     flake-utils.lib.eachDefaultSystem(system:
       let
         oldpkgs = nixpkgs.legacyPackages.${system};
-	unstablepkgs = import nixunstable { inherit system; };
+	      unstablepkgs = import nixunstable { inherit system; };
         pkgs = import nixpkgs {
           config = {
             allowUnfree = true;
@@ -23,50 +23,76 @@
           overlays = [
 		        (import (builtins.fetchTarball {
 		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-                          sha256 = "10cm60581b7ma5r4451vdbyrs5rvwg44fd5qbjli0swqhgzzg8h0";
-		        }))
+              sha256 = "10cm60581b7ma5r4451vdbyrs5rvwg44fd5qbjli0swqhgzzg8h0";
+            })
+            )  
 		      ];
         };
 
-         devtools = {
-            staticcheck = oldpkgs.buildGoModule {
-              name = "staticcheck";
-              src = oldpkgs.fetchFromGitHub {
-                owner = "dominikh";
-                repo = "go-tools";
-                rev = "2023.1.2";
-                sha256 = "sha256-Xnylkv0n3FExQ4e4pmD6DAUqGtud80wHHoVY56UXfOU";
-              };
-              doCheck = false;
-              subPackages = [ "cmd/staticcheck" ];
-              vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
-	    };
-            pkgsite = oldpkgs.buildGoModule {
-              name = "pgsite";
-              src = oldpkgs.fetchFromGitHub {
-                owner = "golang";
-                repo = "pkgsite";
-                rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
-                sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
-              };
-              doCheck = false;
-              subPackages = [ "cmd/pkgsite" ];
-              vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+        devtools = {
+  
+          staticcheck = oldpkgs.buildGoModule {
+            name = "staticcheck";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "dominikh";
+              repo = "go-tools";
+              rev = "2023.1.2";
+              sha256 = "sha256-Xnylkv0n3FExQ4e4pmD6DAUqGtud80wHHoVY56UXfOU";
             };
-         };
+            doCheck = false;
+            subPackages = [ "cmd/staticcheck" ];
+            vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
+	        };
+          pkgsite = oldpkgs.buildGoModule {
+            name = "pgsite";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "golang";
+              repo = "pkgsite";
+              rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
+              sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
+            };
+            doCheck = false;
+            subPackages = [ "cmd/pkgsite" ];
+            vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+          };
+        };
       in
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
+              # Emacs
               pkgs.emacsGit
+              unstablepkgs.fzf
+
+              # Go 
               unstablepkgs.go_1_20
-              unstablepkgs.neovim
               unstablepkgs.gopls
+
+              # Go tools
+              devtools.staticcheck
+              devtools.pkgsite
+              unstablepkgs.golangci-lint
+              unstablepkgs.gotools
+
+              # Protobuf 
               unstablepkgs.buf
+              unstablepkgs.protobuf3_19
               unstablepkgs.protoc-gen-go
               unstablepkgs.protoc-gen-go-grpc
-              unstablepkgs.fzf
+              unstablepkgs.protoc-gen-validate
               unstablepkgs.protoc-gen-grpc-web
+              
+
+              # Node 
+              unstablepkgs.nodejs-19_x
+              pkgs.nodePackages.typescript
+              pkgs.nodePackages.npm
+
+              # Misc 
+              unstablepkgs.neovim
+              pkgs.xz
+              pkgs.zip
+              pkgs.unzip
               pkgs.pandoc
               pkgs.ripgrep
               pkgs.docker
@@ -74,20 +100,13 @@
               pkgs.cmake
               pkgs.clang
               pkgs.ninja
+              pkgs.mesa
               pkgs.pkg-config
               pkgs.ispell
-              pkgs.nodejs-19_x
               pkgs.xdg-utils
-              pkgs.nodePackages.typescript
-              pkgs.nodePackages.npm
-              unstablepkgs.protobuf3_19
-              unstablepkgs.golangci-lint
-              unstablepkgs.protoc-gen-validate
-              unstablepkgs.gotools
-              unstablepkgs.protoc-gen-grpc-web
-              devtools.staticcheck
-              devtools.pkgsite
+
             ];
+
 
             shellHook = ''
               echo "Welcome to Nix shell"
@@ -111,6 +130,7 @@
               RESET="$(tput sgr0)"
               PS1='\[\033[01;32m\]\h\[\033[00m\] \W$(__git_ps1 " ''${RED}(%s)''${RESET}") $ '
               alias vi='nvim'
+              export CHROME_EXECUTABLE=/snap/bin/chromium
             '';
           };
         }
