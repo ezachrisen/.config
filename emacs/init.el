@@ -706,12 +706,8 @@ Use in `isearch-mode-end-hook'."
 ;;; --------------------------------------------------------------------- EGLOT
 
 (when (string= language-server "eglot")
-
 (setq eldoc-echo-area-use-multiline-p 1)
 (setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
-
-
-
 )
 
 
@@ -727,6 +723,8 @@ Use in `isearch-mode-end-hook'."
 		 ("C-c y l" . 'yas-describe-tables))
   :config
   (yas-global-mode 1)
+  :init 
+  (load "yasnippet.el") ;; to fix weird yas bug
   :hook (go-ts-mode . yas-minor-mode))
 
 

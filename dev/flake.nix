@@ -23,7 +23,7 @@
           overlays = [
 		        (import (builtins.fetchTarball {
 		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-              sha256 = "10cm60581b7ma5r4451vdbyrs5rvwg44fd5qbjli0swqhgzzg8h0";
+              sha256 = "080bysqflhwpns7d32c1j6i6hs29n7mw1y847b60r1ckk93k8n0x";
             })
             )  
 		      ];
@@ -42,7 +42,20 @@
             doCheck = false;
             subPackages = [ "cmd/staticcheck" ];
             vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
-	        };
+	  };
+
+          spannercli = oldpkgs.buildGoModule {
+            name = "spannercli";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "cloudspannerecosystem";
+              repo = "spanner-cli";
+              rev = "a80699f";
+              sha256 = "sha256-Vz6vosf24rhMMOmwygNI/9thBDEukCG7Uuw81mm5E5c=";
+            };
+            #doCheck = false;
+            vendorSha256 = "sha256-5CY2h+eP96QpP/KHUvNIoJ7ggZJbPzNafCS6RB7Q+pQ=";
+	  };
+
           pkgsite = oldpkgs.buildGoModule {
             name = "pgsite";
             src = oldpkgs.fetchFromGitHub {
@@ -71,6 +84,7 @@
               # Go tools
               devtools.staticcheck
               devtools.pkgsite
+							devtools.spannercli
               unstablepkgs.golangci-lint
               unstablepkgs.gotools
 
@@ -111,16 +125,17 @@
             shellHook = ''
               echo "Welcome to Nix shell"
               source ./git-prompt.sh
-              emacs () {
-              # Added to .bashrc to set the TERM info for Emacs
-                  if test -f "$HOME/.terminfo/x/xterm-emacs-leg" && ( test "$LC_TERMINAL" == "iTerm2"  || test "$COLORTERM" == "truecolor" )
-                  then
-                      TERM=xterm-emacs-leg command emacs "$@"
-                  else
-                      command emacs "$@"
-                  fi
-              }
-              alias e='emacs'
+              # emacs () {
+              # # Added to .bashrc to set the TERM info for Emacs
+              #     if test -f "$HOME/.terminfo/x/xterm-emacs-leg" && ( test "$LC_TERMINAL" == "iTerm2"  || test "$COLORTERM" == "truecolor" )
+              #     then
+              #         TERM=xterm-emacs-leg command emacs "$@"
+              #     else
+              #         command emacs "$@"
+              #     fi
+              # }
+							alias emacs='emacs -nw'
+              alias e='emacs -nw'
               ./emacs_terminfo.sh
               force_color_prompt=yes
               export COLORTERM=truecolor
@@ -130,7 +145,8 @@
               RESET="$(tput sgr0)"
               PS1='\[\033[01;32m\]\h\[\033[00m\] \W$(__git_ps1 " ''${RED}(%s)''${RESET}") $ '
               alias vi='nvim'
-              export CHROME_EXECUTABLE=/snap/bin/chromium
+						  export CHROME_EXECUTABLE=/snap/bin/chromium
+              cd ~
             '';
           };
         }
