@@ -59,14 +59,9 @@
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
               pkgs.emacs29
-              unstablepkgs.go_1_20
               unstablepkgs.neovim
               unstablepkgs.gopls
-              unstablepkgs.buf
-              unstablepkgs.protoc-gen-go
-              unstablepkgs.protoc-gen-go-grpc
               unstablepkgs.fzf
-              unstablepkgs.protoc-gen-grpc-web
               pkgs.pandoc
               pkgs.ripgrep
               pkgs.docker
@@ -76,15 +71,10 @@
               pkgs.ninja
               pkgs.pkg-config
               pkgs.ispell
-              pkgs.nodejs_20
               pkgs.xdg-utils
-              pkgs.nodePackages.typescript
-              pkgs.nodePackages.npm
-              unstablepkgs.protobuf3_19
               unstablepkgs.golangci-lint
               unstablepkgs.protoc-gen-validate
               unstablepkgs.gotools
-              unstablepkgs.protoc-gen-grpc-web
               devtools.staticcheck
               devtools.pkgsite
             ];
