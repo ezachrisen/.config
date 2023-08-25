@@ -400,7 +400,6 @@ move to the next field. Call `open-line' if nothing else applies."
 (global-set-key (kbd "C-x C-a") 'beginning-of-buffer)
 ;;(global-set-key (kbd "C-x C-e") 'end-of-buffer)
 
-(global-set-key (kbd "C-w") 'backward-kill-word)
 
 ;; required to make the meta-arrow keys work in some terminals
 (define-key input-decode-map "\e\eOA" [(meta up)])
@@ -707,12 +706,8 @@ Use in `isearch-mode-end-hook'."
 ;;; --------------------------------------------------------------------- EGLOT
 
 (when (string= language-server "eglot")
-
 (setq eldoc-echo-area-use-multiline-p 1)
 (setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
-
-
-
 )
 
 
@@ -720,16 +715,17 @@ Use in `isearch-mode-end-hook'."
 
 ;; YASnippet is a templating engine to enable snippets to be inserted with
 ;; intelligent placeholders.
-;; (use-package yasnippet
-;;   :ensure t
-;;   :defer t
-;;   :bind (("C-c y n" . 'yas-new-snippet)
-;; 		 ("C-c y c" . 'yas-expand)
-;; 		 ("C-c y l" . 'yas-describe-tables))
-;;   :config
-;;   (yas-global-mode 1))
-
-;;  :hook (go-ts-mode . yas-minor-mode))
+(use-package yasnippet
+  :ensure t
+  :defer t
+  :bind (("C-c y n" . 'yas-new-snippet)
+		 ("C-c y c" . 'yas-expand)
+		 ("C-c y l" . 'yas-describe-tables))
+  :config
+  (yas-global-mode 1)
+  :init 
+  (load "yasnippet.el") ;; to fix weird yas bug
+  :hook (go-ts-mode . yas-minor-mode))
 
 
 
@@ -1043,6 +1039,7 @@ Format of the local-services variable:
 					 (tags (g grpc a) 
 					  cmd \"<program>\" 
 					  cwd \"<startup dir>\" 
+                      sudo \"t\"
 					  env ((\"<variable_name>\" \"<value>\"))))))
 
 For convenience, services tagged with a can be managed with a
@@ -1053,9 +1050,13 @@ file, define-local-services must be run after .dir-locals.el has
 been loaded.
 
 See an example of .dir-locals.el at the end of init.el."
+  (interactive)
   (message "loading services")
+  (when (not (boundp 'local-services))
+	(hack-dir-local-variables-non-file-buffer))
   (when (boundp 'local-services)
 	(dolist (x local-services)
+	  (message "loading service")
 	  (prodigy-define-service
 		:name (car x)
 		:path (substitute-in-file-name (plist-get (cdr x) 'cwd))
@@ -1064,6 +1065,7 @@ See an example of .dir-locals.el at the end of init.el."
 		:env (plist-get (cdr x) 'env)
 		:args (plist-get (cdr x) 'args)
 		:tags (plist-get (cdr x) 'tags)
+		:sudo (if (string= (plist-get (cdr x) 'sudo) "t") t nil)
 		:stop-signal 'sigkill
 		:kill-process-buffer-on-stop t))))
 
@@ -1096,7 +1098,6 @@ If ARG is 'a', toggles the group of services tagged with a."
 		 (let ((slotnumber 1))
 		   (do-with-services arg 					  
 							 (lambda(s)(let ((params `((side . left) (slot . ,slotnumber))))
-										 (message "params = %s" params)
 										 (-if-let (buffer (get-buffer (prodigy-buffer-name s)))
 											 (progn
 											   (display-buffer-in-side-window buffer params)
@@ -1128,6 +1129,7 @@ Services
   ("p" prodigy "Processes")
   ("r" restart-services  "(Re)start" :column "Processes")
   ("k" kill-services "Kill")
+  ("d" define-local-services "Load service definitions")
   ("a" ((lambda()(restart-services "a"))) "Restart group a"))
 
 (global-set-key (kbd "C-c s") 'hydra-services/body)
@@ -1398,6 +1400,20 @@ ARG is the full path to the directory where you want to run the
   (add-hook 'before-save-hook 'gofmt-before-save nil 'make-it-local))
 ;  (add-hook 'after-save-hook 'go-test nil 'make-it-local))
 
+
+
+
+
+;; --------------------------------------------------------------------- DART / FLUTTER
+
+(use-package dart-mode
+  :ensure t
+  :defer t
+  :hook ((dart-mode-hook . lsp)))
+
+
+(use-package lsp-dart
+  :ensure t)
 
 ;; --------------------------------------------------------------------- MISC LANGUAGES
 

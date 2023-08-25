@@ -12,7 +12,7 @@
     flake-utils.lib.eachDefaultSystem(system:
       let
         oldpkgs = nixpkgs.legacyPackages.${system};
-	unstablepkgs = import nixunstable { inherit system; };
+	      unstablepkgs = import nixunstable { inherit system; };
         pkgs = import nixpkgs {
           config = {
             allowUnfree = true;
@@ -28,45 +28,83 @@
 		      ];
         };
 
-         devtools = {
-            staticcheck = oldpkgs.buildGoModule {
-              name = "staticcheck";
-              src = oldpkgs.fetchFromGitHub {
-                owner = "dominikh";
-                repo = "go-tools";
-                rev = "2023.1.2";
-                sha256 = "sha256-Xnylkv0n3FExQ4e4pmD6DAUqGtud80wHHoVY56UXfOU";
-              };
-              doCheck = false;
-              subPackages = [ "cmd/staticcheck" ];
-              vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
-	    };
-            pkgsite = oldpkgs.buildGoModule {
-              name = "pgsite";
-              src = oldpkgs.fetchFromGitHub {
-                owner = "golang";
-                repo = "pkgsite";
-                rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
-                sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
-              };
-              doCheck = false;
-              subPackages = [ "cmd/pkgsite" ];
-              vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+        devtools = {
+  
+          staticcheck = oldpkgs.buildGoModule {
+            name = "staticcheck";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "dominikh";
+              repo = "go-tools";
+              rev = "2023.1.2";
+              sha256 = "sha256-Xnylkv0n3FExQ4e4pmD6DAUqGtud80wHHoVY56UXfOU";
             };
-         };
+            doCheck = false;
+            subPackages = [ "cmd/staticcheck" ];
+            vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
+	  };
+
+          spannercli = oldpkgs.buildGoModule {
+            name = "spannercli";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "cloudspannerecosystem";
+              repo = "spanner-cli";
+              rev = "a80699f";
+              sha256 = "sha256-Vz6vosf24rhMMOmwygNI/9thBDEukCG7Uuw81mm5E5c=";
+            };
+            #doCheck = false;
+            vendorSha256 = "sha256-5CY2h+eP96QpP/KHUvNIoJ7ggZJbPzNafCS6RB7Q+pQ=";
+	  };
+
+          pkgsite = oldpkgs.buildGoModule {
+            name = "pgsite";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "golang";
+              repo = "pkgsite";
+              rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
+              sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
+            };
+            doCheck = false;
+            subPackages = [ "cmd/pkgsite" ];
+            vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+          };
+        };
       in
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
               pkgs.emacs29
+              unstablepkgs.fzf
+
+              # Go 
               unstablepkgs.go_1_20
-              unstablepkgs.neovim
               unstablepkgs.gopls
+
+              # Go tools
+              devtools.staticcheck
+              devtools.pkgsite
+							devtools.spannercli
+              unstablepkgs.golangci-lint
+              unstablepkgs.gotools
+
+              # Protobuf 
               unstablepkgs.buf
+              unstablepkgs.protobuf3_19
               unstablepkgs.protoc-gen-go
               unstablepkgs.protoc-gen-go-grpc
-              unstablepkgs.fzf
+              unstablepkgs.protoc-gen-validate
               unstablepkgs.protoc-gen-grpc-web
+              
+
+              # Node 
+              unstablepkgs.nodejs-19_x
+              pkgs.nodePackages.typescript
+              pkgs.nodePackages.npm
+
+              # Misc 
+              unstablepkgs.neovim
+              pkgs.xz
+              pkgs.zip
+              pkgs.unzip
               pkgs.pandoc
               pkgs.ripgrep
               pkgs.docker
@@ -74,34 +112,29 @@
               pkgs.cmake
               pkgs.clang
               pkgs.ninja
+              pkgs.mesa
               pkgs.pkg-config
               pkgs.ispell
               pkgs.nodejs_20
               pkgs.xdg-utils
-              pkgs.nodePackages.typescript
-              pkgs.nodePackages.npm
-              unstablepkgs.protobuf3_19
-              unstablepkgs.golangci-lint
-              unstablepkgs.protoc-gen-validate
-              unstablepkgs.gotools
-              unstablepkgs.protoc-gen-grpc-web
-              devtools.staticcheck
-              devtools.pkgsite
+
             ];
+
 
             shellHook = ''
               echo "Welcome to Nix shell"
               source ./git-prompt.sh
-              emacs () {
-              # Added to .bashrc to set the TERM info for Emacs
-                  if test -f "$HOME/.terminfo/x/xterm-emacs-leg" && ( test "$LC_TERMINAL" == "iTerm2"  || test "$COLORTERM" == "truecolor" )
-                  then
-                      TERM=xterm-emacs-leg command emacs "$@"
-                  else
-                      command emacs "$@"
-                  fi
-              }
-              alias e='emacs'
+              # emacs () {
+              # # Added to .bashrc to set the TERM info for Emacs
+              #     if test -f "$HOME/.terminfo/x/xterm-emacs-leg" && ( test "$LC_TERMINAL" == "iTerm2"  || test "$COLORTERM" == "truecolor" )
+              #     then
+              #         TERM=xterm-emacs-leg command emacs "$@"
+              #     else
+              #         command emacs "$@"
+              #     fi
+              # }
+							alias emacs='emacs -nw'
+              alias e='emacs -nw'
               ./emacs_terminfo.sh
               force_color_prompt=yes
               export COLORTERM=truecolor
@@ -111,6 +144,8 @@
               RESET="$(tput sgr0)"
               PS1='\[\033[01;32m\]\h\[\033[00m\] \W$(__git_ps1 " ''${RED}(%s)''${RESET}") $ '
               alias vi='nvim'
+						  export CHROME_EXECUTABLE=/snap/bin/chromium
+              cd ~
             '';
           };
         }
