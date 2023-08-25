@@ -3,7 +3,7 @@
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
     nixunstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
@@ -23,9 +23,8 @@
           overlays = [
 		        (import (builtins.fetchTarball {
 		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-              sha256 = "080bysqflhwpns7d32c1j6i6hs29n7mw1y847b60r1ckk93k8n0x";
-            })
-            )  
+                          sha256 = "0ydzggbrgcbidg7ivnxgmg8p8jgd3d5jx8lbywggndqbzk59ms4i";
+		        }))
 		      ];
         };
 
@@ -75,8 +74,7 @@
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
-              # Emacs
-              pkgs.emacsGit
+              pkgs.emacs29
               unstablepkgs.fzf
 
               # Go 
@@ -119,6 +117,7 @@
               pkgs.mesa
               pkgs.pkg-config
               pkgs.ispell
+              pkgs.nodejs_20
               pkgs.xdg-utils
 
             ];
