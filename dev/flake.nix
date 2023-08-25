@@ -44,19 +44,21 @@
 	  };
 
           spannercli = oldpkgs.buildGoModule {
-            name = "spannercli";
+	          name = "spannercli";
+            pname = "spannercli";
             src = oldpkgs.fetchFromGitHub {
               owner = "cloudspannerecosystem";
               repo = "spanner-cli";
               rev = "a80699f";
               sha256 = "sha256-Vz6vosf24rhMMOmwygNI/9thBDEukCG7Uuw81mm5E5c=";
             };
-            #doCheck = false;
+						subPackages = ["."];
+            doCheck = false;
             vendorSha256 = "sha256-5CY2h+eP96QpP/KHUvNIoJ7ggZJbPzNafCS6RB7Q+pQ=";
 	  };
 
           pkgsite = oldpkgs.buildGoModule {
-            name = "pgsite";
+            name = "pkgsite";
             src = oldpkgs.fetchFromGitHub {
               owner = "golang";
               repo = "pkgsite";
