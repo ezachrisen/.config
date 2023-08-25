@@ -3,70 +3,83 @@
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
     nixunstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
   outputs = { self, nixpkgs, nixunstable, flake-utils, emacs-overlay }:
     flake-utils.lib.eachDefaultSystem(system:
       let
+
         oldpkgs = nixpkgs.legacyPackages.${system};
-	unstablepkgs = import nixunstable { inherit system; };
+
+	      unstablepkgs = import nixunstable { inherit system; };
+
         pkgs = import nixpkgs {
           config = {
             allowUnfree = true;
           };
-
           inherit system; # required to pass system to the builder
-
-          overlays = [
-		        (import (builtins.fetchTarball {
-		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-			  sha256 = "0ydzggbrgcbidg7ivnxgmg8p8jgd3d5jx8lbywggndqbzk59ms4i";
-		        }))
-		      ];
         };
 
-         devtools = {
-            staticcheck = oldpkgs.buildGoModule {
-              name = "staticcheck";
-              src = oldpkgs.fetchFromGitHub {
-                owner = "dominikh";
-                repo = "go-tools";
-                rev = "2023.1.2";
-                sha256 = "sha256-Xnylkv0n3FExQ4e4pmD6DAUqGtud80wHHoVY56UXfOU";
-              };
-              doCheck = false;
-              subPackages = [ "cmd/staticcheck" ];
-              vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
-	    };
-            pkgsite = oldpkgs.buildGoModule {
-              name = "pgsite";
-              src = oldpkgs.fetchFromGitHub {
-                owner = "golang";
-                repo = "pkgsite";
-                rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
-                sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
-              };
-              doCheck = false;
-              subPackages = [ "cmd/pkgsite" ];
-              vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+        gopkg = import (builtins.fetchGit {
+          # Descriptive name to make the store path easier to identify                
+          name = "my-old-revision";                                                 
+          url = "https://github.com/NixOS/nixpkgs/";                       
+          ref = "refs/heads/nixpkgs-unstable";                     
+          rev = "5a8650469a9f8a1958ff9373bd27fb8e54c4365d";                                           
+        }) { inherit system; };                               
+
+        bufpkg = import (builtins.fetchGit {
+          # Descriptive name to make the store path easier to identify                
+          name = "my-old-revision";                                                 
+          url = "https://github.com/NixOS/nixpkgs/";                       
+          ref = "refs/heads/nixpkgs-unstable";                     
+          rev = "55070e598e0e03d1d116c49b9eff322ef07c6ac6";                                           
+        }) { inherit system; };                                                                           
+
+
+        
+        devtools = {
+          staticcheck = oldpkgs.buildGoModule {
+            name = "staticcheck";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "dominikh";
+              repo = "go-tools";
+              rev = "2023.1.2";
+              sha256 = "sha256-Xnylkv0n3FExQ4e4pmD6DAUqGtud80wHHoVY56UXfOU";
             };
-         };
+            doCheck = false;
+            subPackages = [ "cmd/staticcheck" ];
+            vendorSha256 = "sha256-o9UtS6AMgRYuAkOWdktG2Kr3QDBDQTOGSlya69K2br8";
+	        };
+          pkgsite = oldpkgs.buildGoModule {
+            name = "pgsite";
+            src = oldpkgs.fetchFromGitHub {
+              owner = "golang";
+              repo = "pkgsite";
+              rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
+              sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
+            };
+            doCheck = false;
+            subPackages = [ "cmd/pkgsite" ];
+            vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+          };
+        };
+
       in
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
-              pkgs.emacsGit
-#              unstablepkgs.go_1_20
+					    pkgs.emacs29
+              gopkg.go
               unstablepkgs.neovim
-              unstablepkgs.gopls
-  #            unstablepkgs.buf
-  #            unstablepkgs.protoc-gen-go
-  #            unstablepkgs.protoc-gen-go-grpc
+              pkgs.gopls
+              bufpkg.buf
+              #            unstablepkgs.protoc-gen-go
+              #            unstablepkgs.protoc-gen-go-grpc
               unstablepkgs.fzf
-  #            unstablepkgs.protoc-gen-grpc-web
+              #            unstablepkgs.protoc-gen-grpc-web
               pkgs.pandoc
               pkgs.ripgrep
               pkgs.docker
@@ -76,21 +89,21 @@
               pkgs.ninja
               pkgs.pkg-config
               pkgs.ispell
-    #         pkgs.nodejs-19_x
+              #         pkgs.nodejs-19_x
               pkgs.xdg-utils
-   #     pkgs.nodePackages.typescript
-   #            pkgs.nodePackages.npm
-          #    unstablepkgs.protobuf3_19
+              #     pkgs.nodePackages.typescript
+              #            pkgs.nodePackages.npm
+              #    unstablepkgs.protobuf3_19
               unstablepkgs.golangci-lint
-         #     unstablepkgs.protoc-gen-validate
+              #     unstablepkgs.protoc-gen-validate
               unstablepkgs.gotools
-       #      unstablepkgs.protoc-gen-grpc-web
+              #      unstablepkgs.protoc-gen-grpc-web
               devtools.staticcheck
               devtools.pkgsite
             ];
 
             shellHook = ''
-              echo "Welcome to Nix shell"
+              echo "Welcome to Nix shell (basic dev tools)"
               source ./git-prompt.sh
               emacs () {
               # Added to .bashrc to set the TERM info for Emacs
