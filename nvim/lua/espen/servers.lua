@@ -3,8 +3,8 @@ local M         = {}
 local Terminal  = require('toggleterm.terminal').Terminal
 
 local serverOne = Terminal:new({
-  cmd = "./run.sh",
-  dir = "~/moonbase/example/server",
+  cmd = "go run *.go",
+  dir = "~/mars/example/api",
   direction = "horizontal",
   close_on_exit = false,
   auto_scroll = true
