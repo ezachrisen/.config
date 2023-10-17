@@ -21,6 +21,7 @@ vim.keymap.set('n', '<leader>o', function() require("espen.go").GoMenu() end)
 
 
 vim.keymap.set("n", "<leader>g", function() require("espen.servers").ToggleServerWindows() end)
+vim.keymap.set("n", "<leader>q", function() require("espen.servers").RestartTwo() end)
 vim.keymap.set("n", "<leader>q", function() require("espen.servers").StopOne() end)
 
 -- file opening commands

@@ -27,7 +27,7 @@
 (add-to-list 'load-path "~/.config/emacs/lisp")
 
 
-(defvar language-server "lsp")
+(defvar language-server "eglot")
 
 ;; ---------------------------------------------------------------------- STARTUP
 
@@ -86,18 +86,12 @@
 ;;; --------------------------------------------------------------------- PACKAGE MANAGEMENT
 
 										; use-package bootstrap; installs use-package if not already installed
-(require 'package)
+;(require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/")) ;
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/"))
 (package-initialize)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-
-										; (setq use-package-verbose t) ; message when each package is loaded
 
 ;; Install apps into the OS in a use-package declaration with the
 ;; :ensure-system-package keyword.
@@ -118,11 +112,13 @@
 
 ;;; --------------------------------------------------------------------- PARENS
 
-(show-paren-mode nil)               ; Show matching parens
+(show-paren-mode t)               ; Show matching parens
 (setq show-paren-style 'parenthesis ; Show paren only
 	  show-paren-delay 0.03
 	  show-paren-highlight-openparen t
-	  show-paren-when-point-in-periphery t)
+	  show-paren-when-point-in-periphery t
+	  show-paren-context-when-offscreen t
+)
 
 (setq blink-matching-paren t)      ; Show off-screen match in echo area
 
@@ -706,9 +702,19 @@ Use in `isearch-mode-end-hook'."
 ;;; --------------------------------------------------------------------- EGLOT
 
 (when (string= language-server "eglot")
-(setq eldoc-echo-area-use-multiline-p 1)
-(setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
-)
+  (use-package eglot 
+  :bind (("C-c r"   . 'eglot-rename)		 
+		 ("M-'"		. 'xref-find-definitions-other-window))
+  :config
+  (setq 
+   eldoc-echo-area-use-multiline-p 1
+   eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))))
+	
+;;   (setq eldoc-echo-area-use-multiline-p 1)
+;;   (setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
+;;   (global-set-key (kbd "C-c r")  'eglot-rename)
+;;   (global-set-key (kbd "M-'")  'xref-find-definitions-other-window)
+;; )
 
 
 ;;; --------------------------------------------------------------------- SNIPPETS

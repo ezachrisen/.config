@@ -57,6 +57,7 @@ return {
       vim.keymap.set("n", "<leader>e", "<Cmd>Telescope commands<CR>", { desc = "search Ex commands" })
       vim.keymap.set("n", "<leader>ff", "<Cmd>Telescope find_files hidden=true<CR>", { desc = "search files" })
       vim.keymap.set("n", "<leader>fg", "<Cmd>Telescope changed_files<CR>", { desc = "search changed files" })
+      vim.keymap.set("n", "<leader>fr", "<Cmd>Telescope oldfiles<CR>", { desc = "search recent files" })
       -- vim.keymap.set("n", "<leader>h", "<Cmd>Telescope help_tags<CR>", { desc = "search help" })
       vim.keymap.set("n", "<leader>i", "<Cmd>Telescope builtin<CR>", { desc = "search builtins" })
       vim.keymap.set("n", "<leader>j", "<Cmd>Telescope emoji<CR>", { desc = "search emojis" })
