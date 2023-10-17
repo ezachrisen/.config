@@ -4,14 +4,16 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    nixunstable2.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixunstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
-  outputs = { self, nixpkgs, nixunstable, flake-utils, emacs-overlay }:
+  outputs = { self, nixpkgs, nixunstable, nixunstable2, flake-utils, emacs-overlay }:
     flake-utils.lib.eachDefaultSystem(system:
       let
         oldpkgs = nixpkgs.legacyPackages.${system};
+	      unstablepkgs2 = import nixunstable2 { inherit system; };
 	      unstablepkgs = import nixunstable { inherit system; };
         pkgs = import nixpkgs {
           config = {
@@ -20,12 +22,12 @@
 
           inherit system; # required to pass system to the builder
 
-          overlays = [
-		        (import (builtins.fetchTarball {
-		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-                          sha256 = "0ydzggbrgcbidg7ivnxgmg8p8jgd3d5jx8lbywggndqbzk59ms4i";
-		        }))
-		      ];
+#          overlays = [
+#		        (import (builtins.fetchTarball {
+#		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+ #                         sha256 = "0ydzggbrgcbidg7ivnxgmg8p8jgd3d5jx8lbywggndqbzk59ms4i";
+#		        }))
+#		      ];
         };
 
         devtools = {
@@ -103,7 +105,7 @@
               pkgs.nodePackages.npm
 
               # Misc 
-              unstablepkgs.neovim
+              unstablepkgs2.neovim
               pkgs.xz
               pkgs.zip
               pkgs.unzip

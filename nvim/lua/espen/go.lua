@@ -33,7 +33,7 @@ function M.TestPackage(dir)
    compiler go
   vertical 30 copen | wincmd L
   lcd %s
-  AsyncRun -mode=async -pos=right -cols=40 %s -cwd=%s  -focus=0 %s go test %s %s %s
+  AsyncRun -mode=async -pos=right -cols=40 %s -cwd=%s  -focus=0 %s go test %s %s %s ./...
   ]], dir, rawOutput(), dir, go_test_env_string, testRun(), testVerbose(), testTags()))
 end
 

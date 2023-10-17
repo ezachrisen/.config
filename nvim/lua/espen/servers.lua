@@ -3,9 +3,9 @@ local M         = {}
 local Terminal  = require('toggleterm.terminal').Terminal
 
 local serverOne = Terminal:new({
-  cmd = "./run.sh",
-  dir = "~/moonbase/example/server",
-  direction = "horizontal",
+  cmd = "go run *.go",
+  dir = "~/code/mars/example/api",
+  direction = "vertical",
   close_on_exit = false,
   auto_scroll = true
 }
@@ -13,9 +13,9 @@ local serverOne = Terminal:new({
 
 
 local serverTwo = Terminal:new({
-  cmd = "ls",
-  dir = "git_dir",
-  direction = "horizontal",
+  cmd = "go run *.go",
+  dir = "~/code/mars/example/ui",
+  direction = "vertical",
   close_on_exit = false,
   auto_scroll = true
 }
@@ -27,6 +27,8 @@ end
 
 function M.ToggleServerWindows()
   serverOne:toggle()
+  vim.wait(3000, function()
+  end)
   serverTwo:toggle()
 end
 

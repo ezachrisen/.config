@@ -27,7 +27,7 @@
 (add-to-list 'load-path "~/.config/emacs/lisp")
 
 
-(defvar language-server "lsp")
+(defvar language-server "eglot")
 
 ;; ---------------------------------------------------------------------- STARTUP
 
@@ -86,18 +86,12 @@
 ;;; --------------------------------------------------------------------- PACKAGE MANAGEMENT
 
 										; use-package bootstrap; installs use-package if not already installed
-(require 'package)
+;(require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/")) ;
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/"))
 (package-initialize)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-
-										; (setq use-package-verbose t) ; message when each package is loaded
 
 ;; Install apps into the OS in a use-package declaration with the
 ;; :ensure-system-package keyword.
@@ -118,11 +112,13 @@
 
 ;;; --------------------------------------------------------------------- PARENS
 
-(show-paren-mode nil)               ; Show matching parens
+(show-paren-mode t)               ; Show matching parens
 (setq show-paren-style 'parenthesis ; Show paren only
 	  show-paren-delay 0.03
 	  show-paren-highlight-openparen t
-	  show-paren-when-point-in-periphery t)
+	  show-paren-when-point-in-periphery t
+	  show-paren-context-when-offscreen t
+)
 
 (setq blink-matching-paren t)      ; Show off-screen match in echo area
 
@@ -725,9 +721,19 @@ Use in `isearch-mode-end-hook'."
 ;;; --------------------------------------------------------------------- EGLOT
 
 (when (string= language-server "eglot")
-(setq eldoc-echo-area-use-multiline-p 1)
-(setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
-)
+  (use-package eglot 
+  :bind (("C-c r"   . 'eglot-rename)		 
+		 ("M-'"		. 'xref-find-definitions-other-window))
+  :config
+  (setq 
+   eldoc-echo-area-use-multiline-p 1
+   eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))))
+	
+;;   (setq eldoc-echo-area-use-multiline-p 1)
+;;   (setq eglot-ignored-server-capabilities '( :documentHighlightProvider :codeLensProvider))
+;;   (global-set-key (kbd "C-c r")  'eglot-rename)
+;;   (global-set-key (kbd "M-'")  'xref-find-definitions-other-window)
+;; )
 
 
 ;;; --------------------------------------------------------------------- SNIPPETS
@@ -922,7 +928,7 @@ Represents a preview of what a pull request diff will look like."
   :ensure t
   :defer t
   :config
-  (setq treemacs-follow-after-init t
+  (setq treemacs-follow-after-init nil
 		treemacs-width 35
 		treemacs-indentation 2
 		treemacs-recenter-after-file-follow nil
@@ -931,8 +937,8 @@ Represents a preview of what a pull request diff will look like."
 		treemacs-sorting 'alphabetic-asc
 		treemacs-show-hidden-files t
 		treemacs-show-cursor nil
-		treemacs-follow-mode t
-		treemacs-filewatch-mode t
+		treemacs-follow-mode nil
+		treemacs-filewatch-mode nil
 		treemacs-git-mode 'deferred
 		treemacs-project-follow-mode t
 		treemacs-is-never-other-window t
@@ -940,7 +946,6 @@ Represents a preview of what a pull request diff will look like."
 		treemacs-directory-name-transformer    #'identity
 		treemacs-display-in-side-window        nil)
   (treemacs-fringe-indicator-mode 'always)
-  (treemacs-filewatch-mode t)
   (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)
   :bind (:map global-map
 			  ;; ("C-x x" . treemacs-add-and-display-current-project)
@@ -1052,88 +1057,101 @@ name and the cdr is a list of properties corresponding to the
 property names below. It is useful to define multiple tags for
 services to either start/stop them as a group or individually.
 
-Format of the local-services variable:
+Example of a .dir-locals.el definition:
 
-  (local-services . ((\"<service name>\" . 
-					 (tags (g grpc a) 
-					  cmd \"<program>\" 
-					  cwd \"<startup dir>\" 
-                      sudo \"t\"
-					  env ((\"<variable_name>\" \"<value>\"))))))
-
-For convenience, services tagged with a can be managed with a
-single keystroke via the hydra.
-
-If the services are defined in a variable in a .dir-locals.el
-file, define-local-services must be run after .dir-locals.el has
-been loaded.
-
-See an example of .dir-locals.el at the end of init.el."
+ (local-services . 
+ 								 ((:name \"gRPC Server\"
+ 												 :tags (g grpc a)
+ 												 :command\"make\"
+ 												 :cwd \"$HOME/code/xyz\"
+ 												 :args (\"start_grpc\") 
+ 												 :env ((\"CONSOLE_FORMAT\" \"yes\"))							
+ 									       :start-sequences ((a 1)))
+ 									(:name \"UI Server\"
+ 												 :tags (u ui a)
+ 												 :command \"make\"
+ 												 :cwd \"$HOME/code/xyz\"
+ 												 :args (\"start_ui\") 
+ 												 :env ((\"CONSOLE_FORMAT\" \"yes\"))
+ 									       :start-sequences ((a 2)))
+ 								 (:name \"Spanner Emulator\"
+ 												:tags (d)
+ 												:command \"docker\"
+ 												:cwd \"$HOME\"
+ 												:args (\"run\" \"-p\" \"9010:9010\" \"-p\" \"9020:9020\" \"gcr.io/cloud-spanner-emulator/emulator\") 
+ 												:env ((\"CONSOLE_FORMAT\" \"yes\")))))
+"
   (interactive)
   (message "loading services")
   (when (not (boundp 'local-services))
 	(hack-dir-local-variables-non-file-buffer))
-  (when (boundp 'local-services)
-	(dolist (x local-services)
-	  (message "loading service")
+  (when(boundp 'local-services) 
+	(dolist (x local-services) 
+	  (message "Defining service %s" (plist-get x :name))
 	  (prodigy-define-service
-		:name (car x)
-		:path (substitute-in-file-name (plist-get (cdr x) 'cwd))
-		:cwd (substitute-in-file-name (plist-get (cdr x) 'cwd))
-		:command (plist-get (cdr x) 'cmd)
-		:env (plist-get (cdr x) 'env)
-		:args (plist-get (cdr x) 'args)
-		:tags (plist-get (cdr x) 'tags)
-		:sudo (if (string= (plist-get (cdr x) 'sudo) "t") t nil)
-		:stop-signal 'sigkill
-		:kill-process-buffer-on-stop t))))
+		:name (plist-get x :name)
+		:path (substitute-in-file-name (or (plist-get x :path)
+										  (plist-get x :cwd)))
+		:cwd (substitute-in-file-name (plist-get x :cwd))
+		:command (plist-get x :command)
+		:env (plist-get x :env)
+		:args (plist-get x :args)
+		:tags (plist-get x :tags)
+		:sudo (if (string= (plist-get x :sudo) "t") t nil)
+		:stop-signal (or (plist-get x :stop-signal)
+						 'sigkill)
+		:kill-process-buffer-on-stop (or (plist-get x :kill-process-buffer-on-stop)
+										 "unless-visible")))
+	(setq prodigy-services (sort prodigy-services (lambda (a b) (string< (upcase (plist-get a :name)) (upcase (plist-get b :name))))))
 
+))
+
+ 
 (defun restart-services(arg)
   "Start the services tagged with ARG or named ARG."
   (interactive "s(Re)start services with tag or name: ")   
-  (do-with-services arg (lambda(s)(prodigy-restart-service s)))  
-  (show-logs arg))
+  (do-with-services arg 'prodigy-restart-service 5 "Starting" "Started"))
 
-
-(defun kills-ervices(arg)
+(defun kill-services(arg)
   "Stop the services tagged with ARG or named ARG."
   (interactive "sKill services with tag or name: ") 
-  (do-with-services arg (lambda(s)(prodigy-stop-service s t))))
-
-
-(defvar service-group-a-visible-p nil 
-  "Flag; set by Lisp to true of service group a is visible.")
-
+  (do-with-services arg (lambda(s)(prodigy-stop-service s t)) 0 "Killing" "Killed"))
 
 (defun show-logs(arg)
   "Show logs for services tagged with ARG or named ARG.
 If ARG is 'a', toggles the group of services tagged with a."
   (interactive "sShow logs for services with tag or name: ") 
-  (cond ((and (string= arg "a") service-group-a-visible-p)
-		 (setq service-group-a-visible-p nil)
-		 (hide-logs arg))
-		(t
-		 (setq service-group-a-visible-p t)
-		 (let ((slotnumber 1))
-		   (do-with-services arg 					  
-							 (lambda(s)(let ((params `((side . left) (slot . ,slotnumber))))
-										 (-if-let (buffer (get-buffer (prodigy-buffer-name s)))
-											 (progn
-											   (display-buffer-in-side-window buffer params)
-											   (setq slotnumber (1+ slotnumber)))))))))))
+  (setq slotnumber 1)
+  (message "starting in slot %d" slotnumber)
+  (setq slot 1)
+	(do-with-services arg (lambda(s &rest rest) (display-service-log-in-left-side-slot s)) 0 "Showing" "Y"  ))
+
+(defun display-service-log-in-left-side-slot (service)
+  (message "display service %s in slot number %d" (plist-get service :name) slot)
+  (let ((params `((side . left) (slot . ,slot))))
+	(-if-let (buffer (get-buffer (prodigy-buffer-name service)))
+		(progn
+		  (display-buffer-in-side-window buffer params)		  
+		  (setq slot (+ slot 1))))))
 
 (defun hide-logs(arg)
   "Hide logs for services tagged with ARG or named ARG."
   (interactive "sHide logs for services with tag or name: ") 
-  (do-with-services arg (lambda(s)(-if-let (buffer (get-buffer (prodigy-buffer-name s)))
-									  (delete-windows-on buffer)))))
+  (do-with-services arg (lambda(s &rest rest)(-if-let (buffer (get-buffer (prodigy-buffer-name s)))
+									  (delete-windows-on buffer))) 0 ))
 
-(defun do-with-services(arg fun)
-  "Apply the function FUN to all Prodigy services that have a name or tag matching ARG."
+(defun do-with-services(arg fun delay &optional start-msg finished-msg)
+  "Apply the FUN to all Prodigy services that have a name or tag matching ARG.
+FUN must take one argument, the prodigy service.
+Waits DElAY seconds between applying FUN to each service. 
+Displays START-MSG when FUN is applied, and FINISHED-MSG when FUN is done.
+START-MSG and FINISHED-MSG default to 'Processing' and 'Finished' if not set."
   (dolist (s prodigy-services)
 	(when (or (member (intern arg) (plist-get s :tags))
-			  (eq arg (plist-get s :name)))
-	  (funcall fun s))))
+			  (eq arg (plist-get s :name))) 
+	  (message "%s %s" (or start-msg "Processing") (plist-get s :name))
+	  (funcall fun s (lambda() (message "%s %s" (or finished-msg "Finished") (plist-get s :name))))
+	  (sit-for delay))))
 
 
 
@@ -1142,19 +1160,16 @@ If ARG is 'a', toggles the group of services tagged with a."
 Services
    "
   ("q" nil "quit")
-  ("t" ((lambda() (show-logs "a"))) "Toggle group a" :column "Windows")
-  ("l" show-logs "Show logs")
+  ("r" restart-services  "(Re)start" :column "Control")
+  ("a" ((lambda () (restart-services "a")))  "(Re)start a" )
+  ("b" ((lambda () (restart-services "b")))  "(Re)start b" )
+  ("k" kill-services "Kill")  
+  ("l" show-logs "Show logs" :column "Logs")
   ("h" hide-logs "Hide logs")
-  ("p" prodigy "Processes")
-  ("r" restart-services  "(Re)start" :column "Processes")
-  ("k" kill-services "Kill")
-  ("d" define-local-services "Load service definitions")
-  ("a" ((lambda()(restart-services "a"))) "Restart group a"))
+  ("p" prodigy "List" :column "Processes")
+  ("d" define-local-services "Load service definitions"))
 
 (global-set-key (kbd "C-c s") 'hydra-services/body)
-;;(global-set-key (kbd "C-t") (lambda ()(interactive) (show-logs "a")))
-
-
 
 
 ;;; --------------------------------------------------------------------- TEXT MODE
@@ -1408,7 +1423,7 @@ ARG is the full path to the directory where you want to run the
   (setq go-ts-mode-indent-offset 2)
   (subword-mode 1)
   (company-mode)
-  (electric-pair-mode)
+;;  (electric-pair-mode)
   (cond 
    ((string= language-server "lsp")
 	(message "activating lsp in go mode")
@@ -1998,8 +2013,28 @@ Emacs will not reuse a dedicated window for output, such as compilation."
 ;;							 "pb.d.ts"
 ;;							 ".png"
 ;;							 ".jpg"))
-;;	 (local-services . (("gRPC Server" . (tags (g grpc a) cmd "./run.sh" cwd "/home/api/cmd/grpc-server" env (("CONSOLE_FORMAT" "yes"))))
-;;						("UI Server" . (tags (u ui a) cmd "npm" cwd "/home/app" args ("run" "dev")))))
+;; (local-services . 
+;; 								 ((:name "gRPC Server"
+;; 												 :tags (g grpc a)
+;; 												 :command"make"
+;; 												 :cwd "$HOME/code/xyz"
+;; 												 :args ("start_grpc") 
+;; 												 :env (("CONSOLE_FORMAT" "yes"))							
+;; 									       :start-sequences ((a 1)))
+;; 									(:name "UI Server"
+;; 												 :tags (u ui a)
+;; 												 :command "make"
+;; 												 :cwd "$HOME/code/xyz"
+;; 												 :args ("start_ui") 
+;; 												 :env (("CONSOLE_FORMAT" "yes"))
+;; 									       :start-sequences ((a 2)))
+;; 								 (:name "Spanner Emulator"
+;; 												:tags (d)
+;; 												:command "docker"
+;; 												:cwd "$HOME"
+;; 												:args ("run" "-p" "9010:9010" "-p" "9020:9020" "gcr.io/cloud-spanner-emulator/emulator") 
+;; 												:env (("CONSOLE_FORMAT" "yes")))))
+;;
 ;;        (flycheck-protoc-import-path . ("/home/xyz/proto/stuff"
 ;;					   "/home/xyz/proto/api/"
 ;;					   "/home/xyz/proto/include")))))

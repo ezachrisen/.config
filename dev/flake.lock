@@ -100,12 +100,29 @@
         "type": "github"
       }
     },
+    "nixunstable2": {
+      "locked": {
+        "lastModified": 1696356164,
+        "narHash": "sha256-5jGwl4z0K/nDjeYqR29lEe7Mg7hPDoCBlb17fqZQgxo=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f227f12d246b1e7916993c1e4c66f9f185d94586",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "emacs-overlay": "emacs-overlay",
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2",
-        "nixunstable": "nixunstable"
+        "nixunstable": "nixunstable",
+        "nixunstable2": "nixunstable2"
       }
     },
     "systems": {
