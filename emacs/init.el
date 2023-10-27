@@ -85,8 +85,8 @@
 
 ;;; --------------------------------------------------------------------- PACKAGE MANAGEMENT
 
-										; use-package bootstrap; installs use-package if not already installed
-;(require 'package)
+; use-package bootstrap; installs use-package if not already installed
+(require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/")) ;
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/"))

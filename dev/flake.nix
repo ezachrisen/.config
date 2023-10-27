@@ -80,7 +80,7 @@
               unstablepkgs.fzf
 
               # Go 
-              unstablepkgs.go_1_20
+              unstablepkgs.go
               unstablepkgs.gopls
 
               # Go tools
@@ -92,7 +92,7 @@
 
               # Protobuf 
               unstablepkgs.buf
-              unstablepkgs.protobuf3_19
+              pkgs.protobuf3_19
               unstablepkgs.protoc-gen-go
               unstablepkgs.protoc-gen-go-grpc
               unstablepkgs.protoc-gen-validate
@@ -100,7 +100,7 @@
               
 
               # Node 
-              unstablepkgs.nodejs-19_x
+              #unstablepkgs.nodejs-19_x
               pkgs.nodePackages.typescript
               pkgs.nodePackages.npm
 
