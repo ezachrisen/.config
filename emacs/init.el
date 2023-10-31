@@ -27,7 +27,7 @@
 (add-to-list 'load-path "~/.config/emacs/lisp")
 
 
-(defvar language-server "eglot")
+(defvar language-server "lsp")
 
 ;; ---------------------------------------------------------------------- STARTUP
 
@@ -660,10 +660,11 @@ Use in `isearch-mode-end-hook'."
 		 ("M-'"		. 'xref-find-definitions-other-window))
   :config
   (setq lsp-enable-symbol-highlighting t		; highlight references of symbol at point
+		lsp-enable-file-watchers nil ; to fix timeout issue 
 		lsp-lens-enable nil
 										; lsp-completion-provider :none
 		lsp-enable-links nil					; turn off links; they're ugly
-		lsp-file-watch-threshold 5000			; max files to watch before warning
+		;lsp-file-watch-threshold 5000			; max files to watch before warning
 										; lsp-ui-doc-enable nil
 										; lsp-diagnostic-package :auto
 		eldoc-echo-area-use-multiline-p nil		; don't allow resizing echo area
