@@ -7,7 +7,7 @@
 ;;; Code:
 
 ;; -------------------------------------------------- INIT.EL
-(setq debug-on-error t)
+;; (setq debug-on-error t)
 (setq warning-minimum-level :error) ; quiet, unless it's bad
 
 
@@ -2053,17 +2053,18 @@ Emacs will not reuse a dedicated window for output, such as compilation."
   :bind
   ;; Don't forget to set keybinds!
   :config
-  (setenv "FZF_DEFAULT_COMMAND" "rg --files --follow -g '!node_modules' -g '!gowsdl' -g '!wsdl' -g '!*.serviceV2.go' -g '!*.pb.go' -g '!vendor/' -g '!*.pb.gw.go' -g '!*.pb.validate.go'")
-  (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll"
+  (setenv "FZF_DEFAULT_COMMAND" "rg --files --follow --colors 'match:fg:magenta'  -g '!node_modules' -g '!gowsdl' -g '!wsdl' -g '!*.serviceV2.go' -g '!*.pb.go' -g '!vendor/' -g '!*.pb.gw.go' -g '!*.pb.validate.go'")
+  (setq fzf/args "--ansi -x --print-query --margin=1,0 --no-hscroll"
 		;; fzf/args "-x --print-query --margin=1,0 --no-hscroll --preview 'bat --color=always --style=header,grid --line-range :300 {}'"
         fzf/args-for-preview "--preview 'bat --color=always --style=header,grid --line-range :100 {}'"
         fzf/args-for-preview ""
 		fzf/executable "fzf"
-        fzf/git-grep-args "-i --line-number %s ':!*.pb.validate.go' ':!**/.dockerignore' ':!**/.gcloudignore' ':!**/.moreignore' ':!**/.vscode/**'  ':!**/.gitattributes' ':!**/.gitignore'  ':!*.pb.go' ':!*.d.ts' ':!*_pb.js' ':!**/gowsdl/' ':!**/wsdl/' "
+        fzf/git-grep-args " -i --line-number %s ':!*.pb.validate.go' ':!**/.dockerignore' ':!**/.gcloudignore' ':!**/.moreignore' ':!**/.vscode/**'  ':!**/.gitattributes' ':!**/.gitignore'  ':!*.pb.go' ':!*.d.ts' ':!*_pb.js' ':!**/gowsdl/' ':!**/wsdl/' "
         ;; command used for `fzf-grep-*` functions
         ;; example usage for ripgrep:
-        ;; fzf/grep-command "rg --no-heading -nH"
-        fzf/grep-command "grep -nrH"
+         fzf/grep-command "rg --no-heading -nH --color=always"
+        ;; fzf/grep-command "grep -nrH "
+
         ;; If nil, the fzf buffer will appear at the top of the window
         fzf/position-bottom t
         fzf/window-height 25))
@@ -2077,7 +2078,7 @@ Find Stuff
   ("b" ((lambda() (interactive) (fzf-switch-buffer))) "buffer")
   ("r" ((lambda() (interactive) (fzf-recentf t))) "recent")
   ("g" ((lambda() (interactive) (ezfzf-git-grep))) "git grep")
-  ("*" ((lambda() (interactive) (ezfzf-git-grep-word))) "git grep *")
+  ("*" ((lambda() (interactive) (fzf-grep-dwim-with-narrowing))) "git grep *")
   )
 
 (run-with-idle-timer
@@ -2101,9 +2102,11 @@ Find Stuff
      #'fzf--action-find-file-with-line  ; ACTION
      (locate-dominating-file default-directory ".git") ; DIRECTORY
 	 t ; AS_FILTER
-	 (thing-at-point 'word 'no-properties) ; INITQ
+	 (thing-at-point 'symbol 'no-properties) ; INITQ
 	 nil ; FILE-PATTERN
 	 )))
+
+;;)
 
 
 (defun ezfzf-git-grep ()

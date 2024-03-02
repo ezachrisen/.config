@@ -7,22 +7,22 @@ return {
   "neovim/nvim-lspconfig",
   config = function()
     -- fix_imports ensures that imports are sorted and grouped correctly.
-    local function fix_imports()
-      local params = vim.lsp.util.make_range_params()
-      params.context = { only = { "source.organizeImports" } }
-      local result = vim.lsp.buf_request_sync(0,
-        "textDocument/codeAction",
-        params)
-      for _, res in pairs(result or {}) do
-        for _, r in pairs(res.result or {}) do
-          if r.edit then
-            vim.lsp.util.apply_workspace_edit(r.edit, "UTF-8")
-          else
-            vim.lsp.buf.execute_command(r.command)
-          end
-        end
-      end
-    end
+    -- local function fix_imports()
+    --   local params = vim.lsp.util.make_range_params()
+    --   params.context = { only = { "source.organizeImports" } }
+    --   local result = vim.lsp.buf_request_sync(0,
+    --     "textDocument/codeAction",
+    --     params)
+    --   for _, res in pairs(result or {}) do
+    --     for _, r in pairs(res.result or {}) do
+    --       if r.edit then
+    --         vim.lsp.util.apply_workspace_edit(r.edit, "UTF-8")
+    --       else
+    --         vim.lsp.buf.execute_command(r.command)
+    --       end
+    --     end
+    --   end
+    -- end
 
     vim.diagnostic.config({
       virtual_text = false,
@@ -44,14 +44,14 @@ return {
         -- require("lsp-inlayhints").on_attach(client, bufnr)
         -- require("illuminate").on_attach(client)
 
-        vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-          group = vim.api.nvim_create_augroup("FixGoImports",
-            { clear = true }),
-          pattern = "*.go",
-          callback = function()
-            fix_imports()
-          end
-        })
+        -- vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+        --   group = vim.api.nvim_create_augroup("FixGoImports",
+        --     { clear = true }),
+        --   pattern = "*.go",
+        --   callback = function()
+        --     fix_imports()
+        --   end
+        -- })
 
         vim.keymap.set("n", "<leader><leader>lv",
           "<Cmd>cex system('revive -exclude vendor/... ./...') | cwindow<CR>",
@@ -134,7 +134,7 @@ return {
             vim.keymap.set('n', 'K', "<Cmd>RustHoverActions<CR>",
               bufopts)
           end,
-              ["rust-analyzer"] = {
+          ["rust-analyzer"] = {
             assist = {
               importEnforceGranularity = true,
               importPrefix = "create"

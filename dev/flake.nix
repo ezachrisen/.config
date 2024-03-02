@@ -13,14 +13,14 @@
     flake-utils.lib.eachDefaultSystem(system:
       let
         oldpkgs = nixpkgs.legacyPackages.${system};
-	      unstablepkgs2 = import nixunstable2 { inherit system; };
-	      unstablepkgs = import nixunstable { inherit system; };
+	unstablepkgs2 = import nixunstable2 { inherit system; };
+	unstablepkgs = import nixunstable { inherit system; };
         pkgs = import nixpkgs {
           config = {
             allowUnfree = true;
-          };
+        };
 
-          inherit system; # required to pass system to the builder
+        inherit system; # required to pass system to the builder
 
 #          overlays = [
 #		        (import (builtins.fetchTarball {
@@ -76,7 +76,7 @@
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
-              pkgs.emacs29
+              unstablepkgs.emacs
               unstablepkgs.fzf
 
               # Go 
@@ -137,7 +137,7 @@
               #         command emacs "$@"
               #     fi
               # }
-							alias emacs='emacs -nw'
+							#alias emacs='emacs -nw'
               alias e='emacs -nw'
               ./emacs_terminfo.sh
               force_color_prompt=yes
