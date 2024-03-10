@@ -80,7 +80,7 @@
               unstablepkgs.fzf
 
               # Go 
-              unstablepkgs.go
+              unstablepkgs.go_1_22
               unstablepkgs.gopls
 
               # Go tools
