@@ -1386,13 +1386,13 @@ ARG is the full path to the directory where you want to run the
 
 
   (pretty-hydra-define hydra-go-test
-	(:title "Go Test" :separator " " :formatter my-hydra-formatter :idle 0.1 :color blue)
+	(:title "Go Test" :separator " " :formatter my-hydra-formatter :idle 0.1 :color red)
 	("Test"
-	 (("m" ((lambda()(go-test t))) "module")
-	 ("p" go-test "package")
+	 (("m" ((lambda()(go-test t))) "module" :color blue)
+	 ("p" go-test "package" :color blue)
 	 ("o" go-test-package-only "package only on save" :toggle t)
-	 ("c" go-test-coverage-in-emacs "coverage")
-	 ("b" go-test-module-benchmarks "benchmarks")
+	 ("c" go-test-coverage-in-emacs "coverage" :color blue)
+	 ("b" go-test-module-benchmarks "benchmarks" :color blue)
 	 ("e" go-test-env (go-test-env-display))
 	 ("u" go-test-run (go-test-run-display))
 	 ("g" go-test-tags (go-test-tags-display))
@@ -1401,6 +1401,7 @@ ARG is the full path to the directory where you want to run the
 	 ("v" go-test-verbose "verbose" :toggle t)
 	 ("h" go-test-path (go-test-path-display))
 	 ("t" ((lambda()(interactive)(toggle-window "*compilation*"))) "toggle *compilation*")
+	 ("q" quit-window "quit" :color blue)
 	 )))
 
 (global-set-key (kbd "C-c t") 'hydra-go-test/body)
