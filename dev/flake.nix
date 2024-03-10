@@ -6,15 +6,17 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
     nixunstable2.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixunstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    goplspkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
-  outputs = { self, nixpkgs, nixunstable, nixunstable2, flake-utils, emacs-overlay }:
+  outputs = { self, nixpkgs, nixunstable, nixunstable2, flake-utils, emacs-overlay, goplspkgs }:
     flake-utils.lib.eachDefaultSystem(system:
       let
         oldpkgs = nixpkgs.legacyPackages.${system};
-	unstablepkgs2 = import nixunstable2 { inherit system; };
-	unstablepkgs = import nixunstable { inherit system; };
+	      unstablepkgs2 = import nixunstable2 { inherit system; };
+	      unstablepkgs = import nixunstable { inherit system; };
+	      gopls = import goplspkgs { inherit system; };
         pkgs = import nixpkgs {
           config = {
             allowUnfree = true;
@@ -64,12 +66,12 @@
             src = oldpkgs.fetchFromGitHub {
               owner = "golang";
               repo = "pkgsite";
-              rev = "0a30e374544fc794cc1769dd04254f5be9b62c68";
-              sha256 = "sha256-yZGaldBQVS6xpS4OOOmW4m6vN9TbdGGUMADY5Wq1RyU";
+              rev = "ea43129276ed1c7e85557321bd2af0504fbc4a7f";
+              sha256 = "sha256-AzDXy7axfPVXBm7pQQCwzrkq/QdROZNz0p2KUlgOAnA=";
             };
             doCheck = false;
             subPackages = [ "cmd/pkgsite" ];
-            vendorSha256 = "sha256-qqAUs1TWHEDMfWhi71GEaSkXKmbFpGGzzv5G6XTRG04=";
+            vendorSha256 = "sha256-dsBYeYYk6MonC8NttrbV2nHR1A2OU7iyeiVCj0O887A=";
           };
         };
       in
@@ -81,7 +83,7 @@
 
               # Go 
               unstablepkgs.go_1_22
-              unstablepkgs.gopls
+              gopls.gopls
 
               # Go tools
               devtools.staticcheck

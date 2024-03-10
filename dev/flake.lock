@@ -56,6 +56,22 @@
         "type": "github"
       }
     },
+    "goplspkgs": {
+      "locked": {
+        "lastModified": 1710066242,
+        "narHash": "sha256-bO7kahLdawW7rBqUTfWgf9mdPYrnOo5DGvWRJa9N8Do=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "db339f1706f555794b71aa4eb26a5a240fb6a599",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1698134075,
@@ -140,6 +156,7 @@
       "inputs": {
         "emacs-overlay": "emacs-overlay",
         "flake-utils": "flake-utils_2",
+        "goplspkgs": "goplspkgs",
         "nixpkgs": "nixpkgs_2",
         "nixunstable": "nixunstable",
         "nixunstable2": "nixunstable2"
