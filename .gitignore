@@ -18,7 +18,9 @@
 /emacs/.extension/
 /emacs/projects
 /emacs/tramp
+/emacs/url
 /gcloud/
+/go/telemetry
 /go/env
 /kitty/.kitty.conf.swp
 /dlv

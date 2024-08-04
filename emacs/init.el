@@ -800,7 +800,7 @@ Use in `isearch-mode-end-hook'."
 		 ("C-c m" . 'projectile-compile-project)
 		 ("C-c C-f" . 'helm-projectile)))
 
-										;		 ("C-c f" . 'helm-projectile)))
+;; 										;		 ("C-c f" . 'helm-projectile)))
 
 
 ;; Provides grepping files within a project.
@@ -814,25 +814,63 @@ Use in `isearch-mode-end-hook'."
 		(append helm-boring-buffer-regexp-list
 				(list (rx "*magit-") (rx "*Flycheck") (rx "*Messages")
 					  (rx "*gopls") (rx "*lsp-") (rx "*Help"))))
+
+  ;; This replaces the package func -- see note below
+(defun helm-git-grep-action (candidate &optional where mark)
+  "Define a default action for `helm-git-grep' on CANDIDATE.
+WHERE can be one of `other-window', `other-frame'.
+if MARK is t, Set mark."
+  (message "Candidate = %s" candidate)
+  (let* ((lineno (nth 0 candidate))
+         (fname (or (nth 2 candidate)  ;; -- note: moved this here, otherwise file is never found
+					(with-current-buffer helm-buffer
+                      (get-text-property (point-at-bol) 'help-echo))
+                    )))
+	(message "Filename = %s\n" fname)
+    (case where
+          (other-window (find-file-other-window fname))
+          (other-frame  (find-file-other-frame fname))
+          (grep         (helm-git-grep-save-results-1))
+          (t            (find-file fname)))
+    (unless (or (eq where 'grep))
+      (helm-goto-line lineno))
+    (when mark
+      (set-marker (mark-marker) (point))
+      (push-mark (point) 'nomsg))
+    ;; Save history
+    (unless (or helm-in-persistent-action
+                (string= helm-input ""))
+      (setq helm-git-grep-history
+            (cons helm-pattern
+                  (delete helm-pattern helm-git-grep-history)))
+      (when (> (length helm-git-grep-history)
+               helm-git-grep-max-length-history)
+        (setq helm-git-grep-history
+              (delete (car (last helm-git-grep-history))
+                      helm-git-grep-history))))))
+
   :bind (("C-c p g" . 'helm-git-grep)
 		 ("C-c p *" . 'helm-git-grep-at-point)))
 
 
-(advice-add 'helm-git-grep-args :override
-			(lambda ()
-			  "Override helm's git grep args in order to add '-untracked' to the args."
-			  (delq nil
-					(append
-					 (list "--no-pager" "grep" "--null" "-n" "--no-color" "--untracked"
-						   (if helm-git-grep-ignore-case "-i" nil)
-						   (if helm-git-grep-wordgrep "-w" nil)
-						   (helm-git-grep-showing-leading-and-trailing-lines-option))
-					 (nbutlast
-					  (apply 'append
-							 (mapcar
-							  (lambda (x) (list "-e" x "--and"))
-							  (split-string helm-pattern " +" t))))
-					 (helm-git-grep-pathspec-args)))))
+
+
+
+;; (advice-add 'helm-git-grep-args :override
+;; 			(lambda ()
+;; 			  "Override helm's git grep args in order to add '-untracked' to the args."
+;; 			  (delq nil
+;; 					(append
+;; 					 (list "--no-pager" "grep" "--null" "-n" "--no-color" "--untracked"
+;; 						   (if helm-git-grep-ignore-case "-i" nil)
+;; 						   (if helm-git-grep-wordgrep "-w" nil)
+;; 						   (helm-git-grep-showing-leading-and-trailing-lines-option))
+;; 					 (nbutlast
+;; 					  (apply 'append
+;; 							 (mapcar
+;; 							  (lambda (x) (list "-e" x "--and"))
+;; 							  (split-string helm-pattern " +" t))))
+;; 					 (helm-git-grep-pathspec-args)))))
 
 
 ;; Navigate symbols identified by LSP with Helm. 
