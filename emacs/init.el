@@ -1463,6 +1463,7 @@ ARG is the full path to the directory where you want to run the
   (setq go-ts-mode-indent-offset 2)
   (subword-mode 1)
   (company-mode)
+  (local-set-key (kbd "C-c p") 'insert-go-debug-text)
 ;;  (electric-pair-mode)
   (cond 
    ((string= language-server "lsp")
@@ -1496,6 +1497,11 @@ ARG is the full path to the directory where you want to run the
 			(message "Loaded C hook")
 			(setq tab-width 4)
 			(define-key c-mode-base-map (kbd "C-c C-g") 'compile)))
+
+
+(add-hook 'typescript-ts-mode-hook 
+		  (lambda()
+			(local-set-key (kbd "C-c p") 'insert-js-debug-text)))
 
 
 
@@ -1797,6 +1803,17 @@ and display the buffer."
 			 '("^\\*shell\\*$" . (display-buffer-same-window)))
 
 
+;; ;; left, top, right, bottom
+;; (setq window-sides-slots '(0 0 1 0))
+
+;; (add-to-list 'display-buffer-alist
+;;           `(,(rx (| "*compilation*" "*prodigy-grpc-server-main*"))
+;;             display-buffer-in-side-window
+;;             (side . right)
+;;             (slot . 0)
+;;             (window-parameters . ((no-delete-other-windows . t)))
+;;             (window-width . 80)))
+
 (defun enlarge-horizontally-percent(percent)
   "Widen/shrink the current window wider by PERCENT (as a decimal, e.g., .10).
 If negative, shrink."
@@ -1928,18 +1945,19 @@ Windows
   _]_ pop ez mark     C-]      M-s w toggle word        _h_ help                         repeat          C-x z
                              M-s r toggle rexp        _v_ messages                     eval defun      C-M x
                              C-o occur                _c_ compilation                  eval sexp bef.  C-x C-e
+                                                      _s_ side windows
 
-  ^Editing^                   ^Killing^                   ^Marking^                     ^Look^                        ^Git^
-  ^^────────────────────────  ^^────────────────────────  ^^──────────────────────────  ^^──────────────────────────  ^^──────────────────────────
-  _j_ join lines    u C-j     kill whole line  M-k      _+_ expand region     C-\\     _r_ gruvbox                   _m_ magit           C-c g g
-  _'_ align regexp    C-c a   zap-to-char      M-z      _d_ mark defun        C-M-h   _l_ leuven                    _\\_ diff to main    C-c C-\\
-  _2_ dup. line/reg   M-\"     zap-up-to-char   M-Z      _h_ mark buffer       C-x h   _n_ nord                      _d_ vc-resolve-conf.
+  ^Editing^                   ^Killing^                   ^Marking^                     ^Look^                        ^Debugging^                        
+  ^^────────────────────────  ^^────────────────────────  ^^──────────────────────────  ^^──────────────────────────  ^^──────────────────────────  
+  _j_ join lines    u C-j     kill whole line  M-k      _+_ expand region     C-\\     _r_ gruvbox                   _i_ insert Go  C-c p
+  _'_ align regexp    C-c a   zap-to-char      M-z      _d_ mark defun        C-M-h   _l_ leuven                    _t_ insert Javascript debug
+  _2_ dup. line/reg   M-\"     zap-up-to-char   M-Z      _h_ mark buffer       C-x h   _n_ nord                      
   _o_ open line above C-o     kill sexp        C-M-k                                _b_ borland
-  _b_ open line below M-o     just one space   M-SPC                                _|_ Fill column
-    yank before     C-c yb  del blank lnes   C-x C-o                              _z_ Wide margins
-    yank after      C-c ya  kill line backw  M-0 C-k                              _Z_ Wide margins (all wins)
-							copy to OS       C-M-w                                 
-							paste from OS    C-M-y
+  _b_ open line below M-o     just one space   M-SPC    ^Git^                         _|_ Fill column
+    yank before     C-c yb  del blank lnes   C-x C-o  ^^──────────────────────────  _z_ Wide margins
+    yank after      C-c ya  kill line backw  M-0 C-k  _m_ magit           C-c g g   _Z_ Wide margins (all wins)
+							copy to OS       C-M-w                  \\_ diff to main   C-c C-\\                          
+							paste from OS    C-M-y                  _d_ vc-resolve-conf.
 "
   ("q" nil "quit")
 
@@ -1974,6 +1992,7 @@ Windows
   ("v" ((lambda() (interactive) (toggle-window "*Messages*"))) )
   ("c" ((lambda() (interactive) (toggle-window "*compilation*"))) )
   ("h" ((lambda() (interactive) (toggle-window "*Help*"))) )
+  ("s" ((lambda() (interactive) (window-toggle-side-windows))))
 
   ;; Look
   ("r" ((lambda() (interactive) (load-theme 'gruvbox-dark-medium t))))
@@ -1996,10 +2015,13 @@ Windows
   ("<up>" (lambda() (interactive) (enlarge-vertically-percent .10)) :color red)
   ("<down>" (lambda() (interactive) (enlarge-vertically-percent -.10)) :color red)
 
+  ;; ;; Debug
+  ;; ("i" ((lambda() (interactive) (insert-go-debug-text))) )
+  ;; ("t" ((lambda() (interactive) (insert-js-debug-text))) )
+
+
   )
 (global-set-key (kbd "C-c h") 'hydra-cheat-sheet/body)
-
-
 
 
 ;;; --------------------------------------------------------------------- HANDY TOOLS
@@ -2494,3 +2516,41 @@ Containing LEFT, and RIGHT aligned respectively. Used to format the modeline tex
 
 
 
+;; (defun insert-go-debug-text()
+;;   (interactive)
+;;   (insert (format "fmt.Printf(\"QX%s: \\n\")" (random-string 3)))
+;;   (backward-char 4))
+
+(defun insert-js-debug-text()
+  (interactive)
+  (insert (format "console.log(\"QX%s: \")" (random-string 3)))
+  (backward-char 2)) 
+
+
+(defun random-string (n)
+  "Generate a slug of n random alphanumeric characters.
+
+Inefficient implementation; don't use for large n."
+  (if (= 0 n)
+      ""
+    (concat (random-alnum) (random-string (1- n)))))
+
+(defun random-alnum ()
+  (let* ((alnum "0123456789")
+         (i (% (abs (random)) (length alnum))))
+    (substring alnum i (1+ i))))
+
+
+
+
+(defun find-file-at-point-with-line()
+  "if file has an attached line num goto that line, ie boom.rb:12"
+  (interactive)
+  (setq line-num 0)
+  (save-excursion
+    (search-forward-regexp "[^ ]:" (point-max) t)
+    (if (looking-at "[0-9]+")
+         (setq line-num (string-to-number (buffer-substring (match-beginning 0) (match-end 0))))))
+  (find-file-at-point (ffap-guesser))
+  (if (not (equal line-num 0))
+      (goto-line line-num)))

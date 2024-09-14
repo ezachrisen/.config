@@ -1,0 +1,17 @@
+;;;; Emacs Bookmark Format Version 1;;;; -*- coding: utf-8-emacs; mode: lisp-data -*-
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("qtymap"
+ (filename . "~/maui/api/quote/server.go")
+ (front-context-string . "ces(ctx, nil, re")
+ (rear-context-string . "r = s.refreshPri")
+ (position . 13667)
+ (last-modified 26338 59615 376981 921000))
+("addtocart"
+ (filename . "~/maui/api/cart/add.go")
+ (front-context-string . "eQuoteWithIndigo")
+ (rear-context-string . "uoteServer.Updat")
+ (position . 5048)
+ (last-modified 26338 59427 85984 958000))
+)

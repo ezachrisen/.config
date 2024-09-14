@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: debug statement
+# key: pf
+# --
+fmt.Printf("QXX`(random-string 3)`: $0   %s:%d\n", "`(file-name-nondirectory (buffer-file-name))`", `(line-number-at-pos)`)

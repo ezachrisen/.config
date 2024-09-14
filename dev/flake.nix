@@ -80,6 +80,7 @@
             buildInputs = with pkgs; [
               unstablepkgs.emacs
               unstablepkgs.fzf
+							unstablepkgs.neovim
 
               # Go 
               unstablepkgs.go_1_22
