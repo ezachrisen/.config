@@ -28,7 +28,7 @@ return {
 
       ts.setup({
         defaults = {
-          layout_strategy = "vertical",
+          layout_strategy = "horizontal",
           layout_config = { height = 0.75, preview_height = 0.7 },
           mappings = {
             i = {
@@ -121,6 +121,7 @@ return {
           "--line-number",
           "--column",
           "--glob=!node_modules",
+          "--glob=!vendor",
         },
         pattern = [[\b(KEYWORDS):]],
       },

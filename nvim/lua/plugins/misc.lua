@@ -1,4 +1,11 @@
 return {
+  {
+    "stevearc/overseer.nvim",
+    opts = {},
+  },
+  {
+    "tpope/vim-abolish",
+  },
   { "anuvyklack/hydra.nvim" },
   "skywind3000/asyncrun.vim",
   {

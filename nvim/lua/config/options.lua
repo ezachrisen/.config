@@ -4,3 +4,6 @@
 --
 
 vim.opt.list = false
+vim.g.root_spec = { { ".git", "lua" }, "cwd" }
+vim.opt.incsearch = true
+vim.opt.undofile = true
