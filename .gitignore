@@ -28,3 +28,6 @@
 /flutter
 /htop
 *.so
+zed/.tmp*
+zed/embeddings/semantic-index-db.0.mdb/
+zed/prompts/

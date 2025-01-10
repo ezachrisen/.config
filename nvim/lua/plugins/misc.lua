@@ -9,6 +9,18 @@ return {
   { "anuvyklack/hydra.nvim" },
   "skywind3000/asyncrun.vim",
   {
+    "folke/noice.nvim",
+    opts = {
+      notify = {
+        enabled = false,
+      },
+    },
+  },
+  {
+    "rcarriga/nvim-notify",
+    enabled = false,
+  },
+  {
     "ellisonleao/gruvbox.nvim",
     lazy = false, -- make sure we load this during startup as it is our main colorscheme
     priority = 1000, -- make sure to load this before all the other start plugins

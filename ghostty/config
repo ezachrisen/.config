@@ -1,0 +1,11 @@
+font-family = TX-02
+theme =  GruvboxDark
+font-size = 24
+window-padding-x = 20
+window-padding-y = 20
+window-padding-balance = true
+window-save-state = always
+cursor-style-blink=false
+auto-update=download
+term=xterm
+keybind = global:cmd+grave_accent=toggle_quick_terminal

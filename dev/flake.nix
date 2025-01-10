@@ -7,7 +7,7 @@
     nixunstable2.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixunstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     goplspkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    emacs-overlay.url = "github:nix-community/emacs-overlay";
+    emacs-overlay.url = "github:nix-community/emacs-overlay/6afb2183cef03dcfce47c3bf22b2d44ded54ace0";	
   };
 
   outputs = { self, nixpkgs, nixunstable, nixunstable2, flake-utils, emacs-overlay, goplspkgs }:
@@ -28,7 +28,7 @@
           overlays = [
 		        (import (builtins.fetchTarball {
 		          url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-                          sha256 = "1m6xy06qd04wv7rpsslmvbg86zjvgf52ag9g2aqbfjbwxxkqmhxf";
+                          sha256 = "1c8b91c2xf2asf3qg9s5xkw065nn4jmfizj8bvchsc4d5n5cv6sb";
 		        }))
 		      ];
         };
@@ -79,7 +79,10 @@
         {
           devShell = oldpkgs.mkShell {
             buildInputs = with pkgs; [
-pkgs.emacsGit
+
+              # unstablepkgs.emacs30
+#              pkgs.gcc
+ #             pkgs.libgccjit
               #unstablepkgs.emacs
               unstablepkgs.fzf
 							unstablepkgs.neovim
