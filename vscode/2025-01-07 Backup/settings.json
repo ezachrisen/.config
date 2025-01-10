@@ -1,0 +1,146 @@
+{
+    "emacs-mcx.useMetaPrefixMacCmd":false,
+    "workbench.tree.renderIndentGuides": "none",
+    "go.formatTool": "gofmt",
+    "editor.renderWhitespace": "none",
+    "editor.renderControlCharacters": false,
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.factorypath": true,
+        "**/.gcloudignore": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/node_modules": true
+    },
+    "go.testFlags": [
+        "-v",
+            
+    ],
+    "go.autocompleteUnimportedPackages": true,
+    "explorer.confirmDelete": false,
+    "[go]": {
+        "editor.snippetSuggestions": "none",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "workbench.tree.indent": 20,
+    "workbench.list.horizontalScrolling": true,
+    "gopls": {
+        "usePlaceholders": true,
+        "completeUnimported": true,
+        "deepCompletion": true
+    },
+    "editor.accessibilitySupport": "off",
+    "editor.matchBrackets": "near",
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "java.semanticHighlighting.enabled": false,
+    "editor.multiCursorModifier": "alt",
+    "terminal.integrated.allowChords": false,
+    "workbench.startupEditor": "newUntitledFile",
+    "editor.fontLigatures": false,
+    "[svelte]": {
+        "editor.defaultFormatter": "JamesBirtles.svelte-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "go.useLanguageServer": true,
+    "editor.autoClosingBrackets": "never",
+    "workbench.colorCustomizations": {
+        "activityBarBadge.background": "#2979FF",
+        "activityBar.activeBorder": "#2979FF",
+        "list.activeSelectionForeground": "#2979FF",
+        "list.inactiveSelectionForeground": "#2979FF",
+        "list.highlightForeground": "#2979FF",
+        "scrollbarSlider.activeBackground": "#2979FF50",
+        "editorSuggestWidget.highlightForeground": "#2979FF",
+        "textLink.foreground": "#2979FF",
+        "progressBar.background": "#2979FF",
+        "pickerGroup.foreground": "#2979FF",
+        "tab.activeBorder": "#2979FF",
+        "notificationLink.foreground": "#2979FF",
+        "editorWidget.resizeBorder": "#2979FF",
+        "editorWidget.border": "#2979FF",
+        "settings.modifiedItemIndicator": "#2979FF",
+        "settings.headerForeground": "#2979FF",
+        "panelTitle.activeBorder": "#2979FF",
+        "breadcrumb.activeSelectionForeground": "#2979FF",
+        "menu.selectionForeground": "#2979FF",
+        "menubar.selectionForeground": "#2979FF",
+        "editor.findMatchBorder": "#2979FF",
+        "selection.background": "#2979FF40",
+        "statusBarItem.remoteBackground": "#2979FF"
+    },
+    "materialTheme.accent": "Blue",
+    "go.buildOnSave": "workspace",
+    "go.testOnSave": true,
+    "go.vetOnSave": "off",
+    "go.lintOnSave": "off",
+    "editor.minimap.enabled": false,
+    "scm.diffDecorations": "none",
+    "editor.fontFamily": "Berkeley Mono, Roboto Mono, Menlo, Monaco, 'Courier New', monospace",
+    "explorer.confirmDragAndDrop": false,
+    "cloudcode.gke": {
+        "projectIds": [
+            "atus-chicago-sandbox-dev"
+        ]
+    },
+    "editor.folding": false,
+    "git.enableSmartCommit": true,
+    "svelte.enable-ts-plugin": true,
+    "go.toolsManagement.autoUpdate": true,
+    "sync.autoDownload": true,
+    "sync.autoUpload": true,
+    "sync.forceDownload": true,
+    "sync.forceUpload": true,
+    "sync.quietSync": true,
+    "sync.gist": "692c21590c4f9ae32dd2c791bc458992",
+    "git.autofetch": true,
+    "gitlens.codeLens.enabled": false,
+    "gitlens.codeLens.authors.enabled": false,
+    "go.editorContextMenuCommands": {
+        "fillStruct": true
+    },
+    "go.coverOnTestPackage": false,
+    "go.testTags": "",
+    "workbench.colorTheme": "Gruvbox Dark Soft",
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "keyword.other.dotenv",
+                "settings": {
+                    "foreground": "#FF000000"
+                }
+            }
+        ]
+    },
+    "files.associations": {
+        ".env*": "dotenv"
+    },
+    "editor.codeActionsOnSave": {},
+    "goTestRunner.testFilter": "abcx",
+    "remote.SSH.configFile": "/Users/ezachrisen/vagrant/ssh-config",
+    "git.confirmSync": false,
+    "editor.guides.highlightActiveIndentation": false,
+    "editor.guides.indentation": false,
+    "editor.tabSize": 2,
+    "notebook.lineNumbers": "on",
+    "editor.lineNumbers": "off",
+    "editor.scrollbar.vertical": "hidden",
+    "editor.scrollbar.verticalScrollbarSize":0,
+    "workbench.editor.showTabs": "none",
+    "breadcrumbs.filePath": "last",
+    "breadcrumbs.symbolPath": "off",
+    "go.enableCodeLens": {
+        "runtest": false
+    },
+    "diffEditor.experimental.useTrueInlineView": true,
+    "goTestRunner.verboseOutput": false,
+    "git-blame.config.showBlameInline": false,
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.activityBar.location": "top",
+    "goTestRunner.testDirectory": "/Users/ezachrisen/code/where"
+}

@@ -1,0 +1,187 @@
+// Place your key bindings in this file to override the defaultsauto[]
+[
+  {
+    "key": "alt+;",
+    "command": "editor.action.reindentlines"
+  },
+  {
+    "key": "shift+cmd+g",
+    "command": "workbench.action.tasks.runTask",
+    "args": "grpc",
+    "when": "config.workspaceKeybindings.myAwesomeTask.enabled"
+  },
+  {
+    "key": "shift+cmd+u",
+    "command": "workbench.action.tasks.runTask",
+    "args": "ui",
+    "when": "config.workspaceKeybindings.myAwesomeTask.enabled"
+  },
+  {
+    "key": "cmd+; p",
+    "command": "go.test.package"
+  },
+  {
+    "key": "cmd+; f",
+    "command": "go.test.file"
+  },
+  {
+    "key": "cmd+; t",
+    "command": "go.test.cursor"
+  },
+  {
+    "key": "cmd+; c",
+    "command": "go.test.coverage"
+  },
+  {
+    "key": "cmd+; n",
+    "command": "testing.goToNextMessage",
+    "when": "editorFocus && testing.isPeekVisible"
+  },
+  {
+    "key": "alt+f8",
+    "command": "-testing.goToNextMessage",
+    "when": "editorFocus && testing.isPeekVisible"
+  },
+  {
+    "key": "cmd+; p",
+    "command": "testing.goToPreviousMessage",
+    "when": "editorFocus && testing.isPeekVisible"
+  },
+  {
+    "key": "shift+alt+f8",
+    "command": "-testing.goToPreviousMessage",
+    "when": "editorFocus && testing.isPeekVisible"
+  },
+  {
+    "key": "cmd+; d",
+    "command": "go.debug.cursor"
+  },
+  {
+    "key": "cmd+; m",
+    "command": "go.test.workspace"
+  },
+  {
+    "key": "ctrl+x t",
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "!config.emacs-mcx.useMetaPrefixMacCmd"
+  },
+  {
+    "key": "ctrl+alt+space",
+    "command": "-workbench.action.toggleSidebarVisibility",
+    "when": "!config.emacs-mcx.useMetaPrefixMacCmd"
+  },
+  {
+    "key": "alt+cmd+f",
+    "command": "-editor.action.startFindReplaceAction",
+    "when": "editorFocus || editorIsOpen"
+  },
+  {
+    "key": "ctrl+c l",
+    "command": "lntoggle.toggle"
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "-lntoggle.toggle"
+  },
+  {
+    "key": "alt+k",
+    "command": "emacs-mcx.killWholeLine",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+backspace",
+    "command": "-emacs-mcx.killWholeLine",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+k",
+    "command": "-editor.action.inlineDiffs.previousChange",
+    "when": "editorTextFocus && (arbitrary function)"
+  },
+  {
+    "key": "alt+k",
+    "command": "-editor.action.accessibilityHelpConfigureKeybindings",
+    "when": "accessibilityHelpIsShown && accessibleViewHasUnassignedKeybindings"
+  },
+  {
+    "key": "alt+o",
+    "command": "editor.action.insertLineAfter",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "cmd+enter",
+    "command": "-editor.action.insertLineAfter",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "editor.action.insertLineBefore",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "shift+cmd+enter",
+    "command": "-editor.action.insertLineBefore",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "-lineBreakInsert",
+    "when": "textInputFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "-lineBreakInsert",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "shift+alt+'",
+    "command": "editor.action.duplicateSelection"
+  },
+  {
+    "key": "alt+z",
+    "command": "zaptochar.deleteForward"
+  },
+  {
+    "key": "alt+z",
+    "command": "-editor.action.toggleWordWrap"
+  },
+  {
+    "key": "alt+z",
+    "command": "-workbench.action.terminal.sizeToContentWidth",
+    "when": "terminalFocus && terminalHasBeenCreated && terminalIsOpen || terminalFocus && terminalIsOpen && terminalProcessSupported"
+  },
+  {
+    "key": "ctrl+x g",
+    "command": "workbench.view.scm",
+    "when": "workbench.scm.active"
+  },
+  {
+    "key": "ctrl+shift+g",
+    "command": "-workbench.view.scm",
+    "when": "workbench.scm.active"
+  },
+  {
+    "key": "ctrl+x p",
+    "command": "workbench.view.extensions",
+    "when": "viewContainer.workbench.view.extensions.enabled"
+  },
+  {
+    "key": "shift+cmd+x",
+    "command": "-workbench.view.extensions",
+    "when": "viewContainer.workbench.view.extensions.enabled"
+  },
+  {
+    "key": "ctrl+x f",
+    "command": "workbench.view.explorer",
+    "when": "viewContainer.workbench.view.explorer.enabled"
+  },
+  {
+    "key": "shift+cmd+e",
+    "command": "-workbench.view.explorer",
+    "when": "viewContainer.workbench.view.explorer.enabled"
+  },
+  {
+    "key": "ctrl+c i",
+    "command": "outline.focus"
+  }
+]

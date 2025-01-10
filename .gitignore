@@ -29,3 +29,6 @@
 /htop
 *.so
 .git_local_repo_credentials
+zed/.tmp*
+zed/embeddings/semantic-index-db.0.mdb/
+zed/prompts/

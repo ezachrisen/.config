@@ -11,6 +11,13 @@
 (setq warning-minimum-level :error) ; quiet, unless it's bad
 
 
+;; (setenv "LIBRARY_PATH"
+;; 	(string-join
+;; 	 '("/opt/homebrew/opt/gcc/lib/gcc/14"
+;; 	   "/opt/homebrew/opt/libgccjit/lib/gcc/14"
+;; 	   "/opt/homebrew/opt/gcc/lib/gcc/13/gcc/aarch64-apple-darwin23/14")
+;; 	 ":"))
+
 ;; Enable quick access to init.el
 (defun load-init()
   "Load the init file for editing."
@@ -18,7 +25,7 @@
   (find-file "~/.config/emacs/init.el"))
 
 
-(global-set-key (kbd "C-c C-i") 'load-init)
+(global-set-key (kbd "C-c C-o") 'load-init)
 
 
 ;; Minimize garbage collection during startup
@@ -93,10 +100,10 @@
 (package-initialize)
 
 
-;; Install apps into the OS in a use-package declaration with the
-;; :ensure-system-package keyword.
-(use-package use-package-ensure-system-package
-  :ensure t)
+;; ;; Install apps into the OS in a use-package declaration with the
+;; ;; ;; :ensure-system-package keyword.
+;; (use-package use-package-ensure-system-package
+;;   :ensure t)
 
 
 
@@ -651,7 +658,7 @@ Use in `isearch-mode-end-hook'."
 (use-package lsp-mode
   :ensure t
   :defer t
-  :ensure-system-package (gopls . "go install golang.org/x/tools/gopls@latest")
+;  :ensure-system-package (gopls . "go install golang.org/x/tools/gopls@latest")
   :commands (lsp lsp-deferred)
   :bind (("C-c x"	. 'lsp-find-references)
 		 ("C-c d"	. 'lsp-describe-thing-at-point)
@@ -749,8 +756,8 @@ Use in `isearch-mode-end-hook'."
 		 ("C-c y l" . 'yas-describe-tables))
   :config
   (yas-global-mode 1)
-  :init 
-  (load "yasnippet.el") ;; to fix weird yas bug
+  ;; :init 
+  ;; (load "yasnippet.el") ;; to fix weird yas bug
   :hook (go-ts-mode . yas-minor-mode))
 
 
@@ -1536,7 +1543,6 @@ ARG is the full path to the directory where you want to run the
 
 (add-hook 'emacs-lisp-mode-hook
 		  (lambda ()
-			(message "Loaded lisp hook")
 			(flycheck-mode)
 			(electric-indent-mode -1)
 			(setq tab-width 4)
@@ -5124,3 +5130,4 @@ Inefficient implementation; don't use for large n."
      (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
      (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
