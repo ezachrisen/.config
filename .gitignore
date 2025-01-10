@@ -28,3 +28,4 @@
 /flutter
 /htop
 *.so
+.git_local_repo_credentials
